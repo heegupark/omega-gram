@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const noteSchema = new mongoose.Schema({
+const gramSchema = new mongoose.Schema({
   description: {
     type: String,
     required: true,
@@ -25,6 +25,6 @@ const noteSchema = new mongoose.Schema({
   timestamps: true
 });
 
-const Note = mongoose.model('Note', noteSchema);
+const Gram = mongoose.model('Gram', gramSchema);
 
-module.exports = Note;
+module.exports = Gram;

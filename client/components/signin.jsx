@@ -4,16 +4,22 @@ class Signin extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      username: '',
       email: '',
       password: '',
-      message: ''
+      passwordconfirm: '',
+      message: '',
+      mode: 'signin'
     };
     this.handleSignupClick = this.handleSignupClick.bind(this);
     this.handleCancelClick = this.handleCancelClick.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleSigninClick = this.handleSigninClick.bind(this);
-    this.signin = this.signin.bind(this);
+    this.handleSigninSubmit = this.handleSigninSubmit.bind(this);
+    this.handleSignupSubmit = this.handleSignupSubmit.bind(this);
     this.handleBackToMain = this.handleBackToMain.bind(this);
+    this.signin = this.signin.bind(this);
+    this.signup = this.signup.bind(this);
     this.inputEmail = React.createRef();
   }
 
@@ -22,18 +28,33 @@ class Signin extends Component {
   }
 
   handleSignupClick() {
-    this.props.setPage('signup');
-  }
-
-  handleCancelClick() {
     this.setState({
-      email: '',
-      password: '',
+      mode: 'signup',
       message: ''
     });
   }
 
+  handleSigninClick() {
+    this.setState({
+      mode: 'signin',
+      message: ''
+    });
+  }
+
+  handleCancelClick() {
+    this.setState({
+      username: '',
+      email: '',
+      password: '',
+      message: '',
+      passwordconfirm: ''
+    });
+  }
+
   handleInputChange() {
+    if (event.target.value.length < 2) {
+      event.target.value = event.target.value.trim();
+    }
     this.setState({
       [event.target.name]: event.target.value
     });
@@ -46,10 +67,33 @@ class Signin extends Component {
   }
 
   handleBackToMain() {
-    this.props.setPage('note');
+    this.props.setPage('main');
   }
 
-  handleSigninClick() {
+  handleSignupSubmit() {
+    const { username, email, password, passwordconfirm } = this.state;
+    const { signup } = this;
+    if (password !== passwordconfirm) {
+      this.setState({
+        message: 'Passwords don\'t match.'
+      });
+    } else {
+      const credential = {
+        username,
+        email,
+        password
+      };
+      signup(credential);
+      this.setState({
+        username: '',
+        email: '',
+        password: '',
+        passwordconfirm: ''
+      });
+    }
+  }
+
+  handleSigninSubmit() {
     const { email, password } = this.state;
     const { signin } = this;
     const credential = {
@@ -73,8 +117,8 @@ class Signin extends Component {
     }).then(res => res.json())
       .then(data => {
         if (data.token && data.user) {
-          window.localStorage.setItem('omega-notes-token', data.token);
-          this.props.setPage('note', data.user);
+          window.localStorage.setItem('omega-gram-token', data.token);
+          this.props.setPage('main', data.user);
           this.props.setSignin();
         } else {
           this.setState({
@@ -88,30 +132,81 @@ class Signin extends Component {
       });
   }
 
+  signup(credential) {
+    fetch('/api/users', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(credential)
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.token && data.user) {
+          window.localStorage.setItem('omega-gram-token', data.token);
+          this.props.setPage('main', data.user);
+          this.props.setSignin();
+        } else {
+          this.setState({
+            message: 'Sign-Up is not completed.'
+          });
+        }
+      })
+      .catch(err => {
+        console.error(`Something wrong happened while signing up:${err.message}`);
+      });
+  }
+
   render() {
     const {
       handleSignupClick,
       handleCancelClick,
       handleInputChange,
       handleSigninClick,
+      handleSigninSubmit,
+      handleSignupSubmit,
       handleBackToMain,
       inputEmail
     } = this;
-    const { email, password, message } = this.state;
+    const { username, email, password, passwordconfirm, message, mode } = this.state;
     return (
       <main>
         <div className="row mx-auto sign-item-box">
           <div className="col-sm-6 mx-auto">
-            <div className="h4 text-center text-secondary">signin</div>
+            <div className="h4 text-center text-secondary">{mode === 'signin' ? 'signin' : 'signup'}</div>
+            {mode === 'signup'
+              ? (
+                <div className="input-group mb-3">
+                  <div className="input-group-prepend">
+                    <label htmlFor="username" className="input-group-text bg-dark text-white"><i className="fas fa-user-tag"></i></label>
+                  </div>
+                  <input
+                    required
+                    id="username"
+                    type="username"
+                    className="form-control border-dark"
+                    placeholder="username"
+                    name="username"
+                    value={username || ''}
+                    onChange={handleInputChange}></input>
+                </div>
+              )
+              : (
+                <div className="h-54"></div>
+              )
+            }
+
             <div className="input-group mb-3">
               <div className="input-group-prepend">
-                <span className="input-group-text bg-info text-white">@</span>
+                <label htmlFor="email" className="input-group-text bg-dark text-white">@</label>
               </div>
               <input
                 ref={inputEmail}
                 required
+                id="email"
                 type="email"
-                className="form-control border-info"
+                className="form-control border-dark"
                 placeholder="email"
                 name="email"
                 value={email || ''}
@@ -119,33 +214,68 @@ class Signin extends Component {
             </div>
             <div className="input-group mb-3">
               <div className="input-group-prepend">
-                <span className="input-group-text bg-info text-white"><i className="fas fa-key"></i></span>
+                <label htmlFor="password" className="input-group-text bg-dark text-white"><i className="fas fa-key"></i></label>
               </div>
               <input
                 required
+                id="password"
                 type="password"
-                className="form-control border-info"
+                className="form-control border-dark"
                 placeholder="password"
                 name="password"
                 value={password || ''}
                 onChange={handleInputChange}></input>
             </div>
-            <div className="text-center my-1">
-              <span className="text-danger">{message}</span>
-            </div>
-            <div className="text-center my-2">
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-info mx-1"
-                onClick={handleSigninClick}>signin</button>
-              <button
-                className="btn btn-sm btn-outline-warning mx-1"
-                onClick={handleCancelClick}>cancel</button>
+            {mode === 'signin'
+              ? (
+                <>
+                  <div className="h-54">
+                  </div>
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-dark mx-1 w-60px"
+                      onClick={handleSigninSubmit}>signin</button>
+                    <button
+                      className="btn btn-sm btn-outline-secondary mx-1 w-60px"
+                      onClick={handleCancelClick}>cancel</button>
+                  </div>
+                </>
+              )
+              : (
+                <>
+                  <div className="input-group mb-3">
+                    <div className="input-group-prepend">
+                      <label htmlFor="passwordconfirm" className="input-group-text bg-dark text-white"><i className="fas fa-key"></i></label>
+                    </div>
+                    <input
+                      type="password"
+                      id="passwordconfirm"
+                      className="form-control border-dark"
+                      placeholder="password confirm"
+                      name="passwordconfirm"
+                      value={passwordconfirm || ''}
+                      onChange={handleInputChange}></input>
+                  </div>
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-dark mx-1 w-60px"
+                      onClick={handleSignupSubmit}>signup</button>
+                    <button
+                      className="btn btn-sm btn-outline-secondary mx-1 w-60px"
+                      onClick={handleCancelClick}>cancel</button>
+                  </div>
+                </>
+              )
+            }
+            <div className="row text-center h-54">
+              <span className="text-danger mx-auto my-auto">{message}</span>
             </div>
             <div className="text-center my-3">
               <button
-                className="btn btn-sm mx-1 text-info sign-up-btn"
-                onClick={handleSignupClick}>signup</button>
+                className="btn btn-sm mx-1 text-dark sign-up-btn"
+                onClick={mode === 'signin' ? handleSignupClick : handleSigninClick}>{mode === 'signin' ? 'signup' : 'signin'}</button>
             </div>
             <div className="text-center my-3">
               <button

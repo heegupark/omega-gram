@@ -1,36 +1,21 @@
 require('dotenv/config');
 require('./db/mongoose');
 const userRouter = require('./routers/user');
-const noteRouter = require('./routers/note');
-
-const express = require('express');
-const cors = require('cors');
-const db = require('./database');
-const ClientError = require('./client-error');
+const gramRouter = require('./routers/gram');
+const likeRouter = require('./routers/like');
 const staticMiddleware = require('./static-middleware');
-const sessionMiddleware = require('./session-middleware');
-
-const https = require('https');
-const fs = require('fs');
-
+const ClientError = require('./client-error');
+const express = require('express');
 const app = express();
-app.use(userRouter);
-app.use(noteRouter);
-app.use(cors());
+const cors = require('cors');
 app.use(express.json());
 app.use(staticMiddleware);
-app.use(sessionMiddleware);
-
-app.get('/api/health-check', (req, res, next) => {
-  db.query('select \'successfully connected\' as "message"')
-    .then(result => res.json(result.rows[0]))
-    .catch(err => next(err));
-});
-
-app.use('/api', (req, res, next) => {
-  next(new ClientError(`cannot ${req.method} ${req.originalUrl}`, 404));
-});
-
+app.use(userRouter);
+app.use(gramRouter);
+app.use(likeRouter);
+app.use(cors());
+const https = require('https');
+const fs = require('fs');
 app.use((err, req, res, next) => {
   if (err instanceof ClientError) {
     res.status(err.status).json({ error: err.message });

@@ -2,12 +2,12 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const Note = require('./note');
+const Gram = require('./gram');
 
 const userSchema = new mongoose.Schema({
-  name: {
+  username: {
     type: String,
-    required: true,
+    required: false,
     trim: true
   },
   email: {
@@ -55,8 +55,8 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-userSchema.virtual('notes', {
-  ref: 'Note',
+userSchema.virtual('gram', {
+  ref: 'Gram',
   localField: '_id',
   foreignField: 'owner'
 });
@@ -112,7 +112,7 @@ userSchema.pre('save', async function (next) {
 // Delete user notes when user is removed
 userSchema.pre('remove', async function (next) {
   const user = this;
-  Note.deleteMany({ owner: user._id });
+  Gram.deleteMany({ owner: user._id });
   next();
 });
 

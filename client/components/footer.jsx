@@ -7,7 +7,7 @@ class Footer extends Component {
         <div className="row mx-auto">
           <div className="col text-center">
             <hr />
-          Omegathrone makes ©omega notes
+            Omegathrone makes ©o-gram
           </div>
         </div>
       </footer>

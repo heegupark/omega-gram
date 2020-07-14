@@ -2,26 +2,26 @@ const express = require('express');
 const multer = require('multer');
 const sharp = require('sharp');
 const fs = require('fs');
-const Note = require('../models/note');
+const Gram = require('../models/gram');
 const auth = require('../middleware/auth');
 const router = new express.Router();
 
-router.post('/api/notes', auth, async (req, res) => {
+router.post('/api/gram', auth, async (req, res) => {
   const owner = req.user ? req.user._id : null;
-  const note = new Note({
+  const gram = new Gram({
     ...req.body,
     owner
   });
 
   try {
-    await note.save();
-    res.status(201).send(note);
+    await gram.save();
+    res.status(201).send(gram);
   } catch (e) {
     res.status(400).send(e);
   }
 });
 
-router.get('/api/notes', auth, async (req, res) => {
+router.get('/api/gram', auth, async (req, res) => {
   const match = {};
   const sort = {};
   if (req.query.completed) {
@@ -33,29 +33,29 @@ router.get('/api/notes', auth, async (req, res) => {
     sort[parts[0]] = parts[1] === 'desc' ? -1 : 1;
   }
   try {
-    const note = await Note.find({ owner: req.user }).sort(sort).populate().exec();
-    res.send(note);
+    const gram = await Gram.find({ owner: req.user }).sort(sort).populate().exec();
+    res.send(gram);
   } catch (e) {
     res.status(500).send(e);
   }
 });
 
-router.get('/api/notes/:id', auth, async (req, res) => {
+router.get('/api/gram/:id', auth, async (req, res) => {
   const _id = req.params.id;
   try {
-    const note = await Note.findOne({ _id, owner: req.user._id });
+    const gram = await Gram.findOne({ _id, owner: req.user._id });
 
-    if (!note) {
+    if (!gram) {
       return res.status(404).send();
     }
-    res.send(note);
+    res.send(gram);
   } catch (e) {
     res.status(500).send();
   }
 });
 
-router.post('/api/notes/image/:path', auth, (req, res) => {
-  const folder = `./public/notes/${req.params.path}`;
+router.post('/api/gram/image/:path', auth, (req, res) => {
+  const folder = `./server/public/gram/${req.params.path}`;
   if (!fs.existsSync(folder)) {
     fs.mkdirSync(folder, { recursive: true });
   }
@@ -87,7 +87,7 @@ router.post('/api/notes/image/:path', auth, (req, res) => {
     } else {
       try {
         sharp(req.file.path)
-          .resize({ width: 100 })
+          .resize({ width: 300 })
           .withMetadata()
           .toFile(`${folder}/thumbnail-${req.file.filename}`);
         return res.status(201).json({
@@ -104,7 +104,7 @@ router.post('/api/notes/image/:path', auth, (req, res) => {
   });
 });
 
-router.patch('/api/notes/:id', auth, async (req, res) => {
+router.patch('/api/gram/:id', auth, async (req, res) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = ['description', 'imgUrl', 'thumbnailImgUrl', 'completed'];
   const isValidOperation = updates.every(update => allowedUpdates.includes(update));
@@ -114,28 +114,28 @@ router.patch('/api/notes/:id', auth, async (req, res) => {
   }
 
   try {
-    const note = await Note.findOne({ _id: req.params.id, owner: req.user._id });
-    if (!note) {
+    const gram = await Gram.findOne({ _id: req.params.id, owner: req.user._id });
+    if (!gram) {
       return res.status(404).send();
     }
 
     // eslint-disable-next-line no-return-assign
-    updates.forEach(update => note[update] = req.body[update]);
-    await note.save();
+    updates.forEach(update => gram[update] = req.body[update]);
+    await gram.save();
 
-    res.send(note);
+    res.send(gram);
   } catch (e) {
     res.status(500).send();
   }
 });
 
-router.delete('/api/notes/:id', auth, async (req, res) => {
+router.delete('/api/gram/:id', auth, async (req, res) => {
   try {
-    const note = await Note.findOneAndDelete({ _id: req.params.id, owner: req.user._id });
-    if (!note) {
+    const gram = await Gram.findOneAndDelete({ _id: req.params.id, owner: req.user._id });
+    if (!gram) {
       return res.status(404).send();
     }
-    res.send(note);
+    res.send(gram);
   } catch (e) {
     res.status(500).send();
   }

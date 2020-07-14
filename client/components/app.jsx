@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import Header from './header';
 import Footer from './footer';
-import Note from './note';
+import Main from './main';
 import Signin from './signin';
-import Signup from './signup';
 import Modal from './modal';
 import Disclaimer from './disclaimer';
 
@@ -11,16 +10,16 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      notes: [],
-      originalNotes: [],
-      view: 'note',
+      posts: [],
+      originalPosts: [],
+      view: 'main',
       user: {},
       imgUrl: '',
       thumbnailImgUrl: '',
       description: '',
       modalCategory: '',
       keyword: '',
-      selectedNoteId: null,
+      selectedPostId: null,
       isSignedIn: false,
       isModalOpen: false,
       isFirstSearch: true,
@@ -33,19 +32,19 @@ class App extends Component {
     this.signout = this.signout.bind(this);
     this.setSignin = this.setSignin.bind(this);
     this.setSignout = this.setSignout.bind(this);
-    this.getNotes = this.getNotes.bind(this);
-    this.deleteNote = this.deleteNote.bind(this);
+    this.getPosts = this.getPosts.bind(this);
+    this.deletePost = this.deletePost.bind(this);
     this.openModal = this.openModal.bind(this);
-    this.addNote = this.addNote.bind(this);
+    this.addPost = this.addPost.bind(this);
     this.addImage = this.addImage.bind(this);
-    this.updateNote = this.updateNote.bind(this);
+    this.updatePost = this.updatePost.bind(this);
     this.searchKeyword = this.searchKeyword.bind(this);
     this.handleDisclaimerAccept = this.handleDisclaimerAccept.bind(this);
   }
 
   componentDidMount() {
     this.getUserInfo();
-    this.getNotes();
+    this.getPosts();
   }
 
   handleDisclaimerAccept(accept) {
@@ -58,17 +57,17 @@ class App extends Component {
     this.setState({
       view: page,
       user: user,
-      notes: []
+      posts: []
     });
     this.getUserInfo();
-    this.getNotes();
+    this.getPosts();
   }
 
   setSignin() {
     this.setState({
       isSignedIn: true
     });
-    this.getNotes();
+    this.getPosts();
   }
 
   setSignout() {
@@ -77,12 +76,12 @@ class App extends Component {
       isSignedIn: false,
       user: {}
     });
-    this.getNotes();
+    this.getPosts();
   }
 
-  getNotes() {
-    const token = window.localStorage.getItem('omega-notes-token');
-    fetch('/api/notes/?sortBy=updatedAt:desc', {
+  getPosts() {
+    const token = window.localStorage.getItem('omega-gram-token');
+    fetch('/api/gram/?sortBy=createdAt:desc', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -92,64 +91,69 @@ class App extends Component {
       .then(res => res.json())
       .then(data => {
         this.setState({
-          notes: data
+          posts: data
         });
       })
       .catch(err => console.error(err.message));
   }
 
-  addImage(form, note, category) {
+  addImage(form, post, category) {
     this.setState({
       isUploading: true
     });
-    const _id = this.state.user._id ? this.state.user._id : 'guest';
-    fetch(`/api/notes/image/${_id}`, {
+    const _id = this.state.user._id;
+    fetch(`/api/gram/image/${_id}`, {
       method: 'POST',
       body: form
     }).then(res => res.json())
       .then(data => {
-        // console.log(`${data.message}:${data.filename}`);
-        if (category === 'add') {
-          this.addNote(note);
+        if (category === 'create') {
+          this.addPost(post);
         } else if (category === 'update') {
-          this.updateNote(note);
+          this.updatePost(post);
         }
       })
       .catch(err => {
         console.error('image uploading error', err.message);
         this.setState({
-          isUploading: false
+          isUploading: false,
+          isModalOpen: false
         });
       });
   }
 
-  addNote(note) {
-    const token = window.localStorage.getItem('omega-notes-token');
-    fetch('/api/notes/', {
+  addPost(post) {
+    this.setState({
+      isUploading: true
+    });
+    const token = window.localStorage.getItem('omega-gram-token');
+    fetch('/api/gram/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`
       },
-      body: JSON.stringify(note)
+      body: JSON.stringify(post)
     }).then(res => res.json())
       .then(data => {
         this.setState({
-          notes: [data, ...this.state.notes],
-          isUploading: false
+          posts: [data, ...this.state.posts],
+          isUploading: false,
+          isModalOpen: false
         });
       })
       .catch(err => {
-        console.error('adding a note error', err.message);
+        console.error('adding a post error', err.message);
         this.setState({
-          isUploading: false
+          isUploading: false,
+          isModalOpen: false
         });
       });
   }
 
-  updateNote(updatedNote) {
-    const token = window.localStorage.getItem('omega-notes-token');
-    const arr = [...this.state.notes];
+  updatePost(updatedNote) {
+    const token = window.localStorage.getItem('omega-gram-token');
+    const arr = [...this.state.posts];
     const newArr = arr.map(note => {
       if (note._id === updatedNote.id) {
         note.description = updatedNote.description;
@@ -159,7 +163,7 @@ class App extends Component {
       return note;
     });
     if (token) {
-      fetch(`/api/notes/${updatedNote.id}`, {
+      fetch(`/api/gram/${updatedNote.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -173,7 +177,7 @@ class App extends Component {
       }).then(res => res.json())
         .then(data => {
           this.setState({
-            notes: newArr,
+            posts: newArr,
             isUploading: false
           });
           this.closeModal();
@@ -187,11 +191,11 @@ class App extends Component {
     }
   }
 
-  deleteNote() {
-    const token = window.localStorage.getItem('omega-notes-token');
-    const { selectedNoteId, notes } = this.state;
+  deletePost() {
+    const token = window.localStorage.getItem('omega-gram-token');
+    const { selectedPostId, posts } = this.state;
     if (token) {
-      fetch(`/api/notes/${selectedNoteId}`, {
+      fetch(`/api/gram/${selectedPostId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -201,7 +205,7 @@ class App extends Component {
         .then(res => res.json())
         .then(data => {
           this.setState({
-            notes: notes.filter(note => note._id !== data._id)
+            posts: posts.filter(post => post._id !== data._id)
           });
           this.closeModal();
         })
@@ -210,7 +214,7 @@ class App extends Component {
   }
 
   getUserInfo() {
-    const token = window.localStorage.getItem('omega-notes-token');
+    const token = window.localStorage.getItem('omega-gram-token');
     if (token) {
       fetch('/api/users/me', {
         method: 'GET',
@@ -231,8 +235,7 @@ class App extends Component {
   }
 
   signout() {
-    const token = window.localStorage.getItem('omega-notes-token');
-    // const { user } = this.state;
+    const token = window.localStorage.getItem('omega-gram-token');
     if (token) {
       fetch('/api/users/signout', {
         method: 'POST',
@@ -243,8 +246,7 @@ class App extends Component {
       })
         .then(res => res.json())
         .then(data => {
-          // console.log(data.status);
-          window.localStorage.removeItem('omega-notes-token');
+          window.localStorage.removeItem('omega-gram-token');
           this.setSignout();
         })
         .catch(err => console.error(err.message));
@@ -258,13 +260,14 @@ class App extends Component {
     });
   }
 
-  openModal(category, id, description, imgUrl) {
+  openModal(category, id, description, imgUrl, owner) {
     this.setState({
       modalCategory: category,
       isModalOpen: true,
-      selectedNoteId: id,
+      selectedPostId: id,
       description: description,
-      imgUrl: imgUrl
+      imgUrl: imgUrl,
+      owner: owner
     });
   }
 
@@ -272,82 +275,70 @@ class App extends Component {
     let arr = [];
     const { isFirstSearch } = this.state;
     if (isFirstSearch) {
-      arr = [...this.state.notes];
+      arr = [...this.state.posts];
       this.setState({
-        originalNotes: arr,
+        originalPosts: arr,
         isFirstSearch: false
       });
     } else {
-      arr = [...this.state.originalNotes];
+      arr = [...this.state.originalPosts];
     }
     const newArr = arr.filter(note => {
       return note.description.toLowerCase().includes(keyword.toLowerCase());
     });
     this.setState({
-      notes: newArr,
+      posts: newArr,
       keyword
     });
   }
 
   render() {
     const {
-      addNote,
+      addPost,
       addImage,
       setPage,
       openModal,
       closeModal,
       signout,
       setSignin,
-      deleteNote,
-      updateNote,
+      deletePost,
+      updatePost,
       searchKeyword,
       handleDisclaimerAccept
     } = this;
     const {
-      notes,
+      posts,
       view,
       user,
       isSignedIn,
       isModalOpen,
       modalCategory,
-      selectedNoteId,
+      selectedPostId,
       description,
       imgUrl,
-      thumbnailImgUrl,
       keyword,
+      thumbnailImgUrl,
       isUploading,
       isDisclaimerAccepted
     } = this.state;
-    const username = user ? user.name : '';
+    const username = user ? user.username : '';
     let element = null;
-
     switch (view) {
-      case 'note':
+      case 'main':
         element = (
-          <Note
+          <Main
             user={user}
+            setPage={setPage}
             isSignedIn={isSignedIn}
             isModalOpen={isModalOpen}
             openModal={openModal}
-            notes={notes}
-            addNote={addNote}
-            addImage={addImage}
             keyword={keyword}
-            isUploading={isUploading} />
+            posts={posts}/>
         );
         break;
       case 'signin':
         element = (
           <Signin
-            setPage={setPage}
-            setSignin={setSignin}
-            isUploading={isUploading}
-          />
-        );
-        break;
-      case 'signup':
-        element = (
-          <Signup
             setPage={setPage}
             setSignin={setSignin}
             isUploading={isUploading}
@@ -381,12 +372,13 @@ class App extends Component {
             addImage={addImage}
             modalCategory={modalCategory}
             signout={signout}
-            deleteNote={deleteNote}
-            updateNote={updateNote}
-            selectedNoteId={selectedNoteId}
+            deletePost={deletePost}
+            updatePost={updatePost}
+            selectedPostId={selectedPostId}
             closeModal={closeModal}
             description={description}
             imgUrl={imgUrl}
+            addPost={addPost}
             thumbnailImgUrl={thumbnailImgUrl}
             isUploading={isUploading} />
           : ''
