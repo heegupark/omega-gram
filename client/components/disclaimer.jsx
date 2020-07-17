@@ -7,7 +7,7 @@ class Disclaimer extends Component {
   }
 
   handleAcceptClick() {
-    localStorage.setItem(process.env.DISCLAIMER_STRING, true);
+    localStorage.setItem('omegagramaccept', true);
     this.props.handleDisclaimerAccept(true);
   }
 

@@ -3,6 +3,7 @@ import { Accordion, Card } from 'react-bootstrap';
 import BasicInformation from './basic-information';
 import Followings from './followings';
 import Followers from './followers';
+const authToken = window.localStorage.getItem('omegagram-authtoken');
 
 class User extends Component {
   constructor() {
@@ -33,24 +34,26 @@ class User extends Component {
   }
 
   getFollowers() {
-    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
-    fetch('/api/followers', {
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      }
-    })
-      .then(res => res.json())
-      .then(followers => {
-        this.setState({
-          followers
-        });
+    // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    if (authToken) {
+      fetch('/api/followers', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`
+        }
       })
-      .catch(err => {
-        console.error(`Something wrong happened while getting followers:${err.message}`);
-      });
+        .then(res => res.json())
+        .then(followers => {
+          this.setState({
+            followers
+          });
+        })
+        .catch(err => {
+          console.error(`Something wrong happened while getting followers:${err.message}`);
+        });
+    }
   }
 
   render() {

@@ -7,6 +7,8 @@ import Signin from './signin';
 import Modal from './modal';
 import Disclaimer from './disclaimer';
 
+const authToken = window.localStorage.getItem('omegagram-authtoken');
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -28,7 +30,7 @@ class App extends Component {
       searchUserList: [],
       isUploading: false,
       isFirstLoading: true,
-      isDisclaimerAccepted: localStorage.getItem(process.env.DISCLAIMER_STRING)
+      isDisclaimerAccepted: localStorage.getItem('omegagramaccept')
     };
     this.setPage = this.setPage.bind(this);
     this.getUserInfo = this.getUserInfo.bind(this);
@@ -54,8 +56,8 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.getUserInfo();
-    this.getPosts();
+    if (authToken) { this.getUserInfo(); }
+    if (this.state.isSignedIn) { this.getPosts(); }
   }
 
   componentWillUnmount() {
@@ -100,7 +102,7 @@ class App extends Component {
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          window.localStorage.setItem(process.env.AUTH_TOKEN_STRING, data.token);
+          window.localStorage.setItem('omegagram-autotoken', data.token);
           this.setPage('main', data.user);
           this.setSignin();
         } else {
@@ -123,14 +125,14 @@ class App extends Component {
 
   getPosts(userId) {
     this.clearSearchUserList();
-    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     const url = userId ? `/api/gram/${userId}?sortBy=createdAt:desc` : '/api/gram/?sortBy=createdAt:desc';
-    if (token) {
+    if (authToken) {
       fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${authToken}`
         }
       })
         .then(res => res.json())
@@ -145,67 +147,73 @@ class App extends Component {
   }
 
   addFollowing(userId) {
-    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
-    fetch('/api/following', {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({ following: userId })
-    })
-      .then(res => res.json())
-      .then(updatedUser => {
-        this.setState({
-          user: updatedUser
-        });
+    // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    if (authToken) {
+      fetch('/api/following', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`
+        },
+        body: JSON.stringify({ following: userId })
       })
-      .catch(err => {
-        console.error(`Something wrong happened while following:${err.message}`);
-      });
+        .then(res => res.json())
+        .then(updatedUser => {
+          this.setState({
+            user: updatedUser
+          });
+        })
+        .catch(err => {
+          console.error(`Something wrong happened while following:${err.message}`);
+        });
+    }
   }
 
   stopFollowing(userId) {
-    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
-    fetch('/api/stopfollowing', {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({ following: userId })
-    })
-      .then(res => res.json())
-      .then(updatedUser => {
-        this.setState({
-          user: updatedUser
-        });
+    // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    if (authToken) {
+      fetch('/api/stopfollowing', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`
+        },
+        body: JSON.stringify({ following: userId })
       })
-      .catch(err => {
-        console.error(`Something wrong happened while unfollowing:${err.message}`);
-      });
+        .then(res => res.json())
+        .then(updatedUser => {
+          this.setState({
+            user: updatedUser
+          });
+        })
+        .catch(err => {
+          console.error(`Something wrong happened while unfollowing:${err.message}`);
+        });
+    }
   }
 
   updateUserInfo(body) {
-    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
-    fetch('/api/users/me', {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(body)
-    }).then(res => res.json())
-      .then(user => {
-        this.setState({
-          user
+    // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    if (authToken) {
+      fetch('/api/users/me', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`
+        },
+        body: JSON.stringify(body)
+      }).then(res => res.json())
+        .then(user => {
+          this.setState({
+            user
+          });
+        })
+        .catch(err => {
+          console.error('failed to change user information', err.message);
         });
-      })
-      .catch(err => {
-        console.error('failed to change user information', err.message);
-      });
+    }
   }
 
   addImage(form, post, category) {
@@ -213,62 +221,66 @@ class App extends Component {
       isUploading: true
     });
     const _id = this.state.user._id;
-    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
-    fetch(`/api/gram/image/${_id}`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      body: form
-    }).then(res => res.json())
-      .then(data => {
-        if (category === 'create') {
-          this.addPost(post);
-        } else if (category === 'update') {
-          this.updatePost(post);
-        }
-      })
-      .catch(err => {
-        console.error('image uploading error', err.message);
-        this.setState({
-          isUploading: false,
-          isModalOpen: false
+    // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    if (authToken) {
+      fetch(`/api/gram/image/${_id}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${authToken}`
+        },
+        body: form
+      }).then(res => res.json())
+        .then(data => {
+          if (category === 'create') {
+            this.addPost(post);
+          } else if (category === 'update') {
+            this.updatePost(post);
+          }
+        })
+        .catch(err => {
+          console.error('image uploading error', err.message);
+          this.setState({
+            isUploading: false,
+            isModalOpen: false
+          });
         });
-      });
+    }
   }
 
   addPost(post) {
     this.setState({
       isUploading: true
     });
-    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
-    fetch('/api/gram/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(post)
-    }).then(res => res.json())
-      .then(data => {
-        this.setState({
-          posts: [data, ...this.state.posts],
-          // posts: data,
-          isUploading: false,
-          isModalOpen: false
+    // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    if (authToken) {
+      fetch('/api/gram/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`
+        },
+        body: JSON.stringify(post)
+      }).then(res => res.json())
+        .then(data => {
+          this.setState({
+            posts: [data, ...this.state.posts],
+            // posts: data,
+            isUploading: false,
+            isModalOpen: false
+          });
+        })
+        .catch(err => {
+          console.error('adding a post error', err.message);
+          this.setState({
+            isUploading: false,
+            isModalOpen: false
+          });
         });
-      })
-      .catch(err => {
-        console.error('adding a post error', err.message);
-        this.setState({
-          isUploading: false,
-          isModalOpen: false
-        });
-      });
+    }
   }
 
   updatePost(updatedNote) {
-    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     const arr = [...this.state.posts];
     const newArr = arr.map(note => {
       if (note._id === updatedNote.id) {
@@ -278,12 +290,12 @@ class App extends Component {
       }
       return note;
     });
-    if (token) {
+    if (authToken) {
       fetch(`/api/gram/${updatedNote.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${authToken}`
         },
         body: JSON.stringify({
           description: updatedNote.description,
@@ -308,14 +320,14 @@ class App extends Component {
   }
 
   deletePost() {
-    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     const { selectedPostId, posts } = this.state;
-    if (token) {
+    if (authToken) {
       fetch(`/api/gram/${selectedPostId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${authToken}`
         }
       })
         .then(res => res.json())
@@ -330,39 +342,41 @@ class App extends Component {
   }
 
   getUserInfo() {
-    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
-    if (token) {
+    // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    if (authToken) {
       fetch('/api/users/me', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${authToken}`
         }
       })
         .then(res => res.json())
         .then(user => {
-          this.setState({
-            user
-          });
-          this.setSignin();
+          if (user) {
+            this.setState({
+              user
+            });
+            this.setSignin();
+          }
         })
         .catch(err => console.error(err.message));
     }
   }
 
   signout() {
-    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
-    if (token) {
+    // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    if (authToken) {
       fetch('/api/users/signout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${authToken}`
         }
       })
         .then(res => res.json())
         .then(data => {
-          window.localStorage.removeItem(process.env.AUTH_TOKEN_STRING);
+          window.localStorage.removeItem('omegagram-authtoken');
           this.setSignout();
         })
         .catch(err => console.error(err.message));

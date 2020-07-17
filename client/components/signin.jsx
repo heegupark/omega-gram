@@ -124,7 +124,7 @@ class Signin extends Component {
           isSigningIn: false
         });
         if (data.token && data.user) {
-          window.localStorage.setItem(process.env.AUTH_TOKEN_STRING, data.token);
+          window.localStorage.setItem('omegagram-authtoken', data.token);
           this.props.setPage('main', data.user);
           this.props.setSignin();
         } else {
@@ -155,7 +155,7 @@ class Signin extends Component {
           isSigningUp: false
         });
         if (data.token && data.user) {
-          window.localStorage.setItem(process.env.AUTH_TOKEN_STRING, data.token);
+          window.localStorage.setItem('omegagram-authtoken', data.token);
           this.props.setPage('main', data.user);
           this.props.setSignin();
         } else {

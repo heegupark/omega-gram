@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 // import socketio from 'socket.io-client';
 // const socket = socketio.connect('http://localhost:3001');
+const authToken = window.localStorage.getItem('omegagram-authtoken');
 
 class Comments extends Component {
   constructor() {
@@ -41,7 +42,7 @@ class Comments extends Component {
   }
 
   handleWriteComment() {
-    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     const { comment } = this.state;
     const { postId } = this.props;
     const body = { comment, postId };
@@ -55,33 +56,35 @@ class Comments extends Component {
         message: 'place write something'
       });
     } else {
-      fetch('/api/comment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(body)
-      }).then(res => res.json())
-        .then(result => {
-          this.setState({
-            comments: result.comments,
-            comment: '',
-            viewComment: true
+      if (authToken) {
+        fetch('/api/comment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authToken}`
+          },
+          body: JSON.stringify(body)
+        }).then(res => res.json())
+          .then(result => {
+            this.setState({
+              comments: result.comments,
+              comment: '',
+              viewComment: true
+            });
+          })
+          .catch(err => {
+            console.error('failed to comment', err.message);
           });
-        })
-        .catch(err => {
-          console.error('failed to comment', err.message);
-        });
+      }
     }
   }
 
   getComments() {
-    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     const { postId } = this.props;
     fetch(`/api/comments/${postId}`, {
       headers: {
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${authToken}`
       }
     }).then(res => res.json())
       .then(result => {
