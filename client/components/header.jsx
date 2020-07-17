@@ -13,6 +13,7 @@ class Header extends Component {
     this.handleSearchInputChange = this.handleSearchInputChange.bind(this);
     this.handleSearchCancelClick = this.handleSearchCancelClick.bind(this);
     this.handleSearchClick = this.handleSearchClick.bind(this);
+    this.handleViewUserProfile = this.handleViewUserProfile.bind(this);
   }
 
   handleLogoClick() {
@@ -34,7 +35,13 @@ class Header extends Component {
     this.setState({
       search: event.target.value.trim()
     });
-    this.props.searchKeyword(event.target.value.trim());
+    if (this.state.search.length > 0) {
+      if (this.state.search[0] === '@') {
+        this.props.searchUsers(event.target.value.trim().slice(1));
+      } else {
+        this.props.searchKeyword(event.target.value.trim());
+      }
+    }
   }
 
   handleSearchClick() {
@@ -54,18 +61,23 @@ class Header extends Component {
     this.props.searchKeyword('');
   }
 
+  handleViewUserProfile() {
+    this.props.setPage('user');
+  }
+
   render() {
     const {
       handleLogoClick,
       handleSigninClick,
-      handleSignoutClick,
+      // handleSignoutClick,
       handleSearchInputChange,
       handleSearchCancelClick,
-      handleSearchClick
+      handleSearchClick,
+      handleViewUserProfile
     } = this;
     const {
       view,
-      username,
+      // username,
       isSignedIn,
       isModalOpen,
       isUploading
@@ -74,7 +86,80 @@ class Header extends Component {
     return (
       <header>
         <nav className="navbar bg-dark fixed-top">
-          <div
+          {isSearch && !isUploading && !isModalOpen
+            ? (
+              <>
+                <div
+                  className="input-group search-input-box"
+                  style={{ display: view === 'main' && isSignedIn ? '' : 'none' }}>
+                  <input
+                    autoFocus
+                    type="text"
+                    placeholder="search posts or users(type with '@')"
+                    className="pl-2 mx-auto rounded search-input topdown-animation"
+                    value={search}
+                    onBlur={handleSearchCancelClick}
+                    onChange={handleSearchInputChange}
+                  />
+                  <button
+                    className="topdown-animation text-secondary border-0 bg-transparent position-absolute search-cancel-btn"
+                    onClick={handleSearchCancelClick}>
+                          X
+                  </button>
+                </div>
+              </>
+            )
+            : (
+              <>
+                <div
+                  className="input-group search-input-icon-box"
+                  style={{ display: view === 'main' && isSignedIn ? '' : 'none' }}>
+                  <div
+                    disabled={!isUploading}
+                    className="search-icon text-white text-center cursor hover-blue"
+                    onClick={handleSearchClick}>
+                    <i className="fas fa-search"></i>
+                  </div>
+                </div>
+                <div className="mx-auto">
+                  <div className="col my-auto text-center logo-box">
+                    <img className="omega-logo mr-1 mb-1" src="images/o-logo.png" />
+                    <div className="navbar-brand text-white mx-auto omega-note hover-blue" onClick={handleLogoClick}>gram</div>
+                  </div>
+                </div>
+                <div className="signin-box" style={{ display: view === 'main' || view === 'user' ? '' : 'none' }}>
+                  <div className="text-center text-white mx-auto mt-1">
+                    {isSignedIn
+                      ? (
+                        /* <span
+                      className="username cursor hover-blue"
+                      onClick={handleViewUserProfile}>{username || ''}</span> */
+                        <span
+                          className="username cursor hover-blue"
+                          onClick={handleViewUserProfile}>
+                          <i className="fas fa-user-alt"></i>
+                        </span>
+                      )
+                      // <button
+                      //   disabled={isModalOpen || isUploading}
+                      //   className="mt-2 btn signin-btn text-light"
+                      //   onClick={handleSignoutClick}>
+                      //   <i className="fas fa-sign-out-alt"></i>
+                      // </button>
+                      : (<button
+                        disabled={isModalOpen || isUploading}
+                        className="mt-2 btn signin-btn text-white hover-blue"
+                        onClick={handleSigninClick}>
+                        <i className="fas fa-sign-in-alt"></i>
+                      </button>
+                      )
+                    }
+                  </div>
+                </div>
+              </>
+            )
+          }
+          {/* <div
             className="input-group search-input-box"
             style={{ display: view === 'main' && isSignedIn ? '' : 'none' }}>
             {isSearch && !isUploading && !isModalOpen
@@ -133,7 +218,7 @@ class Header extends Component {
                 </button>
               }
             </div>
-          </div>
+          </div> */}
         </nav>
       </header>
     );

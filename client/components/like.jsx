@@ -1,34 +1,36 @@
 import React, { Component } from 'react';
+import ReactTooltip from 'react-tooltip';
 
 class Like extends Component {
   constructor() {
     super();
     this.state = {
       didILike: false,
-      likeCount: 0,
-      list: [],
-      isMouseOver: false
+      likeList: []
     };
     this.handleLikeClick = this.handleLikeClick.bind(this);
     this.getLikeCount = this.getLikeCount.bind(this);
     this.getDidILike = this.getDidILike.bind(this);
     this.likeNumFormat = this.likeNumFormat.bind(this);
-    this.handleDisplayLikers = this.handleDisplayLikers.bind(this);
   }
 
   componentDidMount() {
-    this.getLikeCount();
     this.getDidILike();
+    this.getLikeCount();
+  }
+
+  componentWillUnmount() {
+    this.setState = (state, callback) => {
+    };
   }
 
   getLikeCount() {
     const { postId } = this.props;
     fetch(`/api/like/${postId}`)
       .then(res => res.json())
-      .then(list => {
+      .then(likeList => {
         this.setState({
-          likeCount: list.length,
-          list: list
+          likeList
         });
       })
       .catch(err => console.error(err.message));
@@ -48,46 +50,32 @@ class Like extends Component {
     })
       .then(res => res.json())
       .then(result => {
-        if (result.length === 1) {
-          this.setState({
-            didILike: true
-          });
-        }
+        this.setState({
+          didILike: result.isLiked
+        });
       })
       .catch(err => console.error(err.message));
   }
 
-  handleDisplayLikers() {
-    this.setState({
-      isMouseOver: !this.state.isMouseOver
-      // isMouseOver: true
-    });
-  }
-
   handleLikeClick() {
-    const { userId, username, postId } = this.props;
+    const token = window.localStorage.getItem('omega-gram-token');
+    const { userId, postId } = this.props;
     fetch('/api/like', {
       method: 'PATCH',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
       },
       body: JSON.stringify({
         userId,
-        username,
         postId
       })
     })
       .then(res => res.json())
       .then(result => {
-        if (result.status === 'liked') {
-          this.setState({
-            didILike: true
-          });
-        } else {
-          this.setState({
-            didILike: false
-          });
-        }
+        this.setState({
+          didILike: result.isLiked
+        });
         this.getLikeCount();
       })
       .catch(err => console.error(err.message));
@@ -96,7 +84,7 @@ class Like extends Component {
   likeNumFormat(number) {
     let like = 'like';
     let changedNumber = number;
-    if (number > 1) like = +'s';
+    if (number > 1) like += 's';
     if (number >= 1e3 && number < 1e6) {
       changedNumber = +(number / 1e3).toFixed(1) + 'K';
     }
@@ -115,63 +103,53 @@ class Like extends Component {
   render() {
     const {
       handleLikeClick,
-      likeNumFormat,
-      handleDisplayLikers
+      likeNumFormat
     } = this;
     const {
       didILike,
-      likeCount,
-      isMouseOver,
-      list
+      likeList
     } = this.state;
+    const { userId, postId } = this.props;
     return (
       <>
-        <div className="col ml-1 text-left">
+        <div className="col ml-1 text-left pl-0">
           {didILike
             ? (
               <i
-                className="fas fa-heart text-danger cursor"
-                onMouseOver={handleDisplayLikers}
-                onMouseOut={handleDisplayLikers}
+                className="fas fa-heart text-danger cursor hover-black"
                 onClick={handleLikeClick}>
               </i>
             )
             : (
-              <i className="far fa-heart cursor"
-                onMouseOver={handleDisplayLikers}
-                onMouseOut={handleDisplayLikers}
+              <i className="far fa-heart cursor hover-red"
                 onClick={handleLikeClick}></i>
             )
           }
-          {likeCount
+          {likeList.length
             ? (
-              <span className="ml-3">{likeNumFormat(likeCount)}</span>
+              <>
+                <span
+                  data-tip=''
+                  data-for={`likers-${postId}`}
+                  className="ml-3"
+                >{likeNumFormat(likeList.length)}</span>
+                <ReactTooltip
+                  className="fade-in"
+                  id={`likers-${postId}`}
+                  place="top"
+                  getContent={() => { return null; }}>
+                  {(likeList.map((item, index) => {
+                    const isMe = userId === item.userId._id;
+                    return (
+                      <div
+                        key={index}>
+                        {isMe ? `${item.userId.username} (me)` : item.userId.username}
+                      </div>
+                    );
+                  }))}
+                </ReactTooltip>
+              </>
             )
-            : ('')
-          }
-          {isMouseOver
-            ? (list.map((item, index) => {
-              const size = list.length >= 4 ? 4 : list.length;
-              if (index <= 2) {
-                return (
-                  <div
-                    key={index}
-                    style={{ top: `${-25 * (size - index)}px` }}
-                    className="px-3 rounded bg-dark text-white liker-mouseover">
-                    {item.username}
-                  </div>
-                );
-              } else if (index === 3) {
-                return (
-                  <div
-                    key={index}
-                    style={{ top: `${-25 * (size - index)}px` }}
-                    className="px-3 rounded bg-dark text-white liker-mouseover">
-                  and more
-                  </div>
-                );
-              }
-            }))
             : ('')
           }
         </div>

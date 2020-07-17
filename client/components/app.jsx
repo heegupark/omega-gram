@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Header from './header';
 import Footer from './footer';
 import Main from './main';
+import User from './user';
 import Signin from './signin';
 import Modal from './modal';
 import Disclaimer from './disclaimer';
@@ -23,7 +24,9 @@ class App extends Component {
       isSignedIn: false,
       isModalOpen: false,
       isFirstSearch: true,
+      searchUserList: [],
       isUploading: false,
+      isFirstLoading: true,
       isDisclaimerAccepted: localStorage.getItem('omegagramaccept')
     };
     this.setPage = this.setPage.bind(this);
@@ -38,13 +41,24 @@ class App extends Component {
     this.addPost = this.addPost.bind(this);
     this.addImage = this.addImage.bind(this);
     this.updatePost = this.updatePost.bind(this);
+    this.clearSearchUserList = this.clearSearchUserList.bind(this);
+    this.searchUsers = this.searchUsers.bind(this);
     this.searchKeyword = this.searchKeyword.bind(this);
+    this.addFollowing = this.addFollowing.bind(this);
+    this.stopFollowing = this.stopFollowing.bind(this);
     this.handleDisclaimerAccept = this.handleDisclaimerAccept.bind(this);
+    this.updateUserInfo = this.updateUserInfo.bind(this);
+    this.guestSignIn = this.guestSignIn.bind(this);
   }
 
   componentDidMount() {
     this.getUserInfo();
     this.getPosts();
+  }
+
+  componentWillUnmount() {
+    this.setState = (state, callback) => {
+    };
   }
 
   handleDisclaimerAccept(accept) {
@@ -53,48 +67,130 @@ class App extends Component {
     });
   }
 
-  setPage(page, user) {
+  setPage(page, user, userId) {
     this.setState({
       view: page,
       user: user,
       posts: []
     });
     this.getUserInfo();
-    this.getPosts();
+    this.getPosts(userId);
   }
 
   setSignin() {
     this.setState({
       isSignedIn: true
     });
-    this.getPosts();
+    // this.getPosts();
+  }
+
+  guestSignIn() {
+    fetch('/api/guest')
+      .then(res => res.json())
+      .then(data => {
+        window.localStorage.setItem('omega-gram-token', data.token);
+        this.setPage('main', data.user);
+        this.setSignin();
+      })
+      .catch(err => console.error(`Failed to create a guest account: ${err.message}`));
   }
 
   setSignout() {
     this.setState({
       isModalOpen: false,
       isSignedIn: false,
-      user: {}
+      posts: [],
+      user: {},
+      view: 'main'
     });
     this.getPosts();
   }
 
-  getPosts() {
+  getPosts(userId) {
+    this.clearSearchUserList();
     const token = window.localStorage.getItem('omega-gram-token');
-    fetch('/api/gram/?sortBy=createdAt:desc', {
-      method: 'GET',
+    const url = userId ? `/api/gram/${userId}?sortBy=createdAt:desc` : '/api/gram/?sortBy=createdAt:desc';
+    if (token) {
+      fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          this.setState({
+            posts: data,
+            isFirstLoading: false
+          });
+        })
+        .catch(err => console.error(`No posts found: ${err.message}`));
+    }
+  }
+
+  addFollowing(userId) {
+    const token = window.localStorage.getItem('omega-gram-token');
+    fetch('/api/following', {
+      method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`
-      }
+      },
+      body: JSON.stringify({ following: userId })
     })
       .then(res => res.json())
-      .then(data => {
+      .then(updatedUser => {
         this.setState({
-          posts: data
+          user: updatedUser
         });
       })
-      .catch(err => console.error(err.message));
+      .catch(err => {
+        console.error(`Something wrong happened while following:${err.message}`);
+      });
+  }
+
+  stopFollowing(userId) {
+    const token = window.localStorage.getItem('omega-gram-token');
+    fetch('/api/stopfollowing', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ following: userId })
+    })
+      .then(res => res.json())
+      .then(updatedUser => {
+        this.setState({
+          user: updatedUser
+        });
+      })
+      .catch(err => {
+        console.error(`Something wrong happened while unfollowing:${err.message}`);
+      });
+  }
+
+  updateUserInfo(body) {
+    const token = window.localStorage.getItem('omega-gram-token');
+    fetch('/api/users/me', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(body)
+    }).then(res => res.json())
+      .then(user => {
+        this.setState({
+          user
+        });
+      })
+      .catch(err => {
+        console.error('failed to change user information', err.message);
+      });
   }
 
   addImage(form, post, category) {
@@ -102,8 +198,12 @@ class App extends Component {
       isUploading: true
     });
     const _id = this.state.user._id;
+    const token = window.localStorage.getItem('omega-gram-token');
     fetch(`/api/gram/image/${_id}`, {
       method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
       body: form
     }).then(res => res.json())
       .then(data => {
@@ -138,6 +238,7 @@ class App extends Component {
       .then(data => {
         this.setState({
           posts: [data, ...this.state.posts],
+          // posts: data,
           isUploading: false,
           isModalOpen: false
         });
@@ -224,9 +325,9 @@ class App extends Component {
         }
       })
         .then(res => res.json())
-        .then(data => {
+        .then(user => {
           this.setState({
-            user: data
+            user
           });
           this.setSignin();
         })
@@ -269,6 +370,29 @@ class App extends Component {
       imgUrl: imgUrl,
       owner: owner
     });
+    this.clearSearchUserList();
+  }
+
+  clearSearchUserList() {
+    this.setState({
+      searchUserList: []
+    });
+  }
+
+  searchUsers(keyword) {
+    this.setState({
+      posts: []
+    });
+    if (keyword.length > 0) {
+      fetch(`/api/users/${keyword}`)
+        .then(res => res.json())
+        .then(users => {
+          this.setState({
+            searchUserList: users
+          });
+        })
+        .catch(err => console.error(err.message));
+    }
   }
 
   searchKeyword(keyword) {
@@ -303,7 +427,14 @@ class App extends Component {
       setSignin,
       deletePost,
       updatePost,
+      clearSearchUserList,
+      searchUsers,
       searchKeyword,
+      addFollowing,
+      stopFollowing,
+      getPosts,
+      guestSignIn,
+      updateUserInfo,
       handleDisclaimerAccept
     } = this;
     const {
@@ -317,6 +448,8 @@ class App extends Component {
       description,
       imgUrl,
       keyword,
+      isFirstLoading,
+      searchUserList,
       thumbnailImgUrl,
       isUploading,
       isDisclaimerAccepted
@@ -329,11 +462,28 @@ class App extends Component {
           <Main
             user={user}
             setPage={setPage}
+            getPosts={getPosts}
             isSignedIn={isSignedIn}
             isModalOpen={isModalOpen}
+            addFollowing={addFollowing}
+            searchUserList={searchUserList}
             openModal={openModal}
+            guestSignIn={guestSignIn}
+            isFirstLoading={isFirstLoading}
             keyword={keyword}
             posts={posts}/>
+        );
+        break;
+      case 'user':
+        element = (
+          <User
+            user={user}
+            setPage={setPage}
+            openModal={openModal}
+            addFollowing={addFollowing}
+            stopFollowing={stopFollowing}
+            updateUserInfo={updateUserInfo}
+            posts={posts} />
         );
         break;
       case 'signin':
@@ -341,8 +491,8 @@ class App extends Component {
           <Signin
             setPage={setPage}
             setSignin={setSignin}
-            isUploading={isUploading}
-          />
+            addFollowing={addFollowing}
+            isUploading={isUploading} />
         );
         break;
     }
@@ -356,6 +506,8 @@ class App extends Component {
           closeModal={closeModal}
           openModal={openModal}
           isModalOpen={isModalOpen}
+          clearSearchUserList={clearSearchUserList}
+          searchUsers={searchUsers}
           searchKeyword={searchKeyword}
           isUploading={isUploading} />
         {element}

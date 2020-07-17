@@ -75,7 +75,11 @@ class Create extends Component {
       const { user, addImage, addPost } = this.props;
       // const pathArr = imgUrl.split('/');
       // const altFilename = pathArr[pathArr.length - 1];
-      const changedImageName = fileName ? `${fileName.split(' ').join('')}` : '';
+      // const changedImageName = fileName ? `${fileName.split(' ').join('')}` : '';
+      const fileNameSplit = fileName ? fileName.split('.') : '';
+      const extention = fileNameSplit[fileNameSplit.length - 1];
+      const randomFileName = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      const changedImageName = fileName ? `${randomFileName}.${extention}` : '';
       const form = new FormData();
       const post = {
         description: description,
@@ -144,10 +148,10 @@ class Create extends Component {
               )
               : fileObject
                 ? (
-                  <div className="mx-auto my-auto">
+                  <div className="mx-auto my-auto note-edit-custom">
                     <img
                       alt=""
-                      className="w-100 cursor img-fluid img-thumbnail rounded"
+                      className="w-100 cursor img-fluid rounded"
                       src={previewFileObject}
                       onClick={handleFileUploadBtnClick}
                       onDragOver={e => e.preventDefault()}

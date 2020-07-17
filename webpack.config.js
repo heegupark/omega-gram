@@ -3,6 +3,7 @@ const path = require('path');
 
 const clientPath = path.join(__dirname, 'client/');
 const publicPath = path.join(__dirname, 'server/public/');
+const gramPath = path.join(__dirname, 'server/public/gram/');
 
 module.exports = {
   resolve: {
@@ -11,6 +12,9 @@ module.exports = {
   entry: clientPath,
   output: {
     path: publicPath
+  },
+  watchOptions: {
+    ignored: [gramPath]
   },
   module: {
     rules: [

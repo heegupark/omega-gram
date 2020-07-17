@@ -2,18 +2,13 @@ const mongoose = require('mongoose');
 
 const likeSchema = new mongoose.Schema({
   postId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'Gram'
   },
   likes: [{
     userId: {
-      type: String,
-      required: true,
-      ref: 'User'
-    },
-    username: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: 'User'
     }

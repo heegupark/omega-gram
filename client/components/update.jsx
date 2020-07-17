@@ -109,7 +109,6 @@ class Update extends Component {
                       style={{ display: isUploading ? 'block' : 'none' }}
                       className="spinner-location-update-custom position-absolute spinner-border text-success"
                       role="status">
-                      <span className="sr-only"></span>
                     </div>
                   </div>
                 )

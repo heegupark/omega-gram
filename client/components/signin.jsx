@@ -9,7 +9,9 @@ class Signin extends Component {
       password: '',
       passwordconfirm: '',
       message: '',
-      mode: 'signin'
+      mode: 'signin',
+      isSigningIn: false,
+      isSigningUp: false
     };
     this.handleSignupClick = this.handleSignupClick.bind(this);
     this.handleCancelClick = this.handleCancelClick.bind(this);
@@ -88,7 +90,8 @@ class Signin extends Component {
         username: '',
         email: '',
         password: '',
-        passwordconfirm: ''
+        passwordconfirm: '',
+        isSigningUp: true
       });
     }
   }
@@ -101,7 +104,8 @@ class Signin extends Component {
       password
     };
     this.setState({
-      password: ''
+      password: '',
+      isSigningIn: true
     });
     signin(credential);
   }
@@ -116,13 +120,17 @@ class Signin extends Component {
       body: JSON.stringify(credential)
     }).then(res => res.json())
       .then(data => {
+        this.setState({
+          isSigningIn: false
+        });
         if (data.token && data.user) {
           window.localStorage.setItem('omega-gram-token', data.token);
           this.props.setPage('main', data.user);
           this.props.setSignin();
         } else {
           this.setState({
-            message: 'Please check your email and password.'
+            message: 'Please check your email and password.',
+            isSigningIn: false
           });
           this.inputEmail.current.focus();
         }
@@ -143,13 +151,17 @@ class Signin extends Component {
     })
       .then(res => res.json())
       .then(data => {
+        this.setState({
+          isSigningUp: false
+        });
         if (data.token && data.user) {
           window.localStorage.setItem('omega-gram-token', data.token);
           this.props.setPage('main', data.user);
           this.props.setSignin();
         } else {
           this.setState({
-            message: 'Sign-Up is not completed.'
+            message: 'Sign-Up is not completed.',
+            isSigningUp: false
           });
         }
       })
@@ -169,7 +181,7 @@ class Signin extends Component {
       handleBackToMain,
       inputEmail
     } = this;
-    const { username, email, password, passwordconfirm, message, mode } = this.state;
+    const { username, email, password, passwordconfirm, message, mode, isSigningIn, isSigningUp } = this.state;
     return (
       <main>
         <div className="row mx-auto sign-item-box">
@@ -232,13 +244,35 @@ class Signin extends Component {
                   <div className="h-54">
                   </div>
                   <div className="text-center">
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-outline-dark mx-1 w-60px"
-                      onClick={handleSigninSubmit}>signin</button>
-                    <button
-                      className="btn btn-sm btn-outline-secondary mx-1 w-60px"
-                      onClick={handleCancelClick}>cancel</button>
+                    {isSigningIn
+                      ? (
+                        <>
+                          <button
+                            disabled
+                            className="btn btn-sm btn-outline-dark mx-1 w-60px">
+                            <div className="spinner-border spinner-border-sm text-dark mb-1" role="status">
+                            </div>
+                          </button>
+                          <button
+                            disabled
+                            className="btn btn-sm btn-outline-secondary mx-1 w-60px">
+                            <div className="spinner-border spinner-border-sm text-dark mb-1" role="status">
+                            </div>
+                          </button>
+                        </>
+                      )
+                      : (
+                        <>
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-outline-dark mx-1 w-60px"
+                            onClick={handleSigninSubmit}>signin</button>
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-outline-secondary mx-1 w-60px"
+                            onClick={handleCancelClick}>cancel</button>
+                        </>
+                      )}
                   </div>
                 </>
               )
@@ -258,13 +292,34 @@ class Signin extends Component {
                       onChange={handleInputChange}></input>
                   </div>
                   <div className="text-center">
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-outline-dark mx-1 w-60px"
-                      onClick={handleSignupSubmit}>signup</button>
-                    <button
-                      className="btn btn-sm btn-outline-secondary mx-1 w-60px"
-                      onClick={handleCancelClick}>cancel</button>
+                    {isSigningUp
+                      ? (
+                        <>
+                          <button
+                            disabled
+                            className="btn btn-sm btn-outline-dark mx-1 w-60px">
+                            <div className="spinner-border spinner-border-sm text-dark mb-1" role="status">
+                            </div></button>
+                          <button
+                            disabled
+                            className="btn btn-sm btn-outline-secondary mx-1 w-60px">
+                            <div className="spinner-border spinner-border-sm text-dark mb-1" role="status">
+                            </div></button>
+                        </>
+                      )
+                      : (
+                        <>
+                          <button
+                            type = "button"
+                            className = "btn btn-sm btn-outline-dark mx-1 w-60px"
+                            onClick = { handleSignupSubmit }>signup</button>
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-outline-secondary mx-1 w-60px"
+                            onClick={handleCancelClick}>cancel</button>
+                        </>
+                      )}
+
                   </div>
                 </>
               )
@@ -274,12 +329,12 @@ class Signin extends Component {
             </div>
             <div className="text-center my-3">
               <button
-                className="btn btn-sm mx-1 text-dark sign-up-btn"
+                className="btn btn-sm mx-1 text-dark sign-up-btn hover-blue"
                 onClick={mode === 'signin' ? handleSignupClick : handleSigninClick}>{mode === 'signin' ? 'signup' : 'signin'}</button>
             </div>
             <div className="text-center my-3">
               <button
-                className="btn btn-sm mx-1 text-secondary sign-up-btn"
+                className="btn btn-sm mx-1 text-secondary sign-up-btn hover-black"
                 onClick={handleBackToMain}>back to main</button>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Like from './like';
-
+import Comments from './comments';
 class Post extends Component {
   constructor(props) {
     super(props);
@@ -15,6 +15,7 @@ class Post extends Component {
     this.handlePostClick = this.handlePostClick.bind(this);
     this.handleMoreClick = this.handleMoreClick.bind(this);
     this.textBolder = this.textBolder.bind(this);
+    this.handleUsernameClick = this.handleUsernameClick.bind(this);
   }
 
   getTimeMsg(updatedAt) {
@@ -87,6 +88,10 @@ class Post extends Component {
     });
   }
 
+  handleUsernameClick() {
+    this.props.getPosts(this.props.owner._id);
+  }
+
   textBolder(text, boldStr) {
     const keyword = new RegExp(boldStr, 'i');
     const array = text.split(keyword);
@@ -110,11 +115,13 @@ class Post extends Component {
     const {
       _id,
       user,
+      owner,
       imgUrl,
       thumbnailImgUrl,
       description,
       updatedAt,
-      keyword
+      keyword,
+      getPosts
     } = this.props;
     const {
       isImgLoaded,
@@ -126,14 +133,19 @@ class Post extends Component {
       textBolder,
       handleMoreClick,
       handleDeleteBtnClick,
-      handleUpdateBtnClick
+      handleUpdateBtnClick,
+      handleUsernameClick
     } = this;
+    const isMe = owner._id === user._id;
     const timeMessage = getTimeMsg(updatedAt);
     return (
       <div className="mb-4">
         <div className="row">
           <div className="col mx-auto post-image">
-            {`${user.username}`}
+            <span
+              className={`hover-goldenrod cursor ${isMe ? 'font-weight-bold' : ''}`}
+              onClick={handleUsernameClick}
+            >{`${owner.username}`}{isMe ? ' (me)' : ''}</span>
           </div>
         </div>
         <div className="row my-1">
@@ -143,7 +155,7 @@ class Post extends Component {
                 <>
                   <img
                     alt=""
-                    className="img-fluid rounded cursor"
+                    className="img-fluid rounded cursor hover-bigger"
                     src={thumbnailImgUrl}
                     onLoad={() => this.setState({ isImgLoaded: true })}
                     style={isImgLoaded ? {} : { display: 'none' }}
@@ -164,43 +176,50 @@ class Post extends Component {
         </div>
         <div className="row mt-2">
           <div className="mx-auto post-image">
-            <div className="row">
-              <Like
-                postId={_id}
-                username={user.username}
-                userId={user._id}
-              />
-            </div>
-            <div className="row">
-              <div className="col ml-1">
+            <Like
+              postId={_id}
+              username={user.username}
+              userId={user._id} />
+            <div className="d-flex">
+              <div className="col text-left pl-0">
                 <div className="">{keyword ? textBolder(description, keyword) : description}</div>
                 <div className="time-msg text-secondary">{timeMessage}</div>
               </div>
-              <div>
-                <button
-                  type="button"
-                  style={!more ? { display: 'none' } : {}}
-                  className="fade-in mb-1 btn btn-sm btn-outline-danger mx-1 pb-0"
-                  onClick={handleDeleteBtnClick}>
-                  <i className="fas fa-eraser"></i></button>
-                <button
-                  type="button"
-                  style={!more ? { display: 'none' } : {}}
-                  className="fade-in mb-1 btn btn-sm btn-outline-warning mx-1 pb-0"
-                  onClick={handleUpdateBtnClick}>
-                  <i className="fas fa-pen-alt"></i></button>
-              </div>
-              <div className="mr-3">
-                <button
-                  className="btn btn-sm border-0"
-                  onClick={handleMoreClick}>
-                  ...
-                </button>
+              <div className="col text-right pr-0">
+                {isMe
+                  ? (
+                    <>
+                      <button
+                        type="button"
+                        style={!more ? { display: 'none' } : {}}
+                        className="more-btn-anim mb-1 btn btn-sm btn-outline-danger mx-1 pb-0 my-auto"
+                        onClick={handleDeleteBtnClick}>
+                        <i className="fas fa-eraser"></i></button>
+                      <button
+                        type="button"
+                        style={!more ? { display: 'none' } : {}}
+                        className="more-btn-anim mb-1 btn btn-sm btn-outline-warning mx-1 pb-0 my-auto"
+                        onClick={handleUpdateBtnClick}>
+                        <i className="fas fa-pen-alt"></i></button>
+                      <button
+                        className="btn btn-sm border-0 my-auto rounded hover-circle"
+                        onClick={handleMoreClick}>
+                      . . .
+                      </button>
+                    </>
+                  )
+                  : ('')
+                }
               </div>
             </div>
-
+            <div>
+              <Comments
+                postId={_id}
+                userId={user._id}
+                getPosts={getPosts}
+              />
+            </div>
           </div>
-
         </div>
       </div>
     );

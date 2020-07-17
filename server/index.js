@@ -3,19 +3,21 @@ require('./db/mongoose');
 const userRouter = require('./routers/user');
 const gramRouter = require('./routers/gram');
 const likeRouter = require('./routers/like');
+const commentRouter = require('./routers/comment');
 const staticMiddleware = require('./static-middleware');
 const ClientError = require('./client-error');
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const https = require('https');
+const fs = require('fs');
 app.use(express.json());
 app.use(staticMiddleware);
 app.use(userRouter);
 app.use(gramRouter);
 app.use(likeRouter);
+app.use(commentRouter);
 app.use(cors());
-const https = require('https');
-const fs = require('fs');
 app.use((err, req, res, next) => {
   if (err instanceof ClientError) {
     res.status(err.status).json({ error: err.message });
@@ -26,7 +28,6 @@ app.use((err, req, res, next) => {
     });
   }
 });
-
 if (process.env.ENV === 'DEV') {
   app.listen(process.env.PORT, () => {
     // eslint-disable-next-line no-console

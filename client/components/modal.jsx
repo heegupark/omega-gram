@@ -4,6 +4,7 @@ import Create from './create';
 import Update from './update';
 import Delete from './delete';
 import Enlarge from './enlarge';
+import ChangePassword from './change-password';
 
 class Modal extends Component {
   constructor(props) {
@@ -140,6 +141,15 @@ class Modal extends Component {
             postId={selectedPostId}
             imgUrl={imgUrl}
             description={description}
+            handleModalCancelClick={handleModalCancelClick}
+          />
+        );
+        break;
+      case 'changePassword':
+        element = (
+          <ChangePassword
+            // userId={user._id}
+            user={user}
             handleModalCancelClick={handleModalCancelClick}
           />
         );

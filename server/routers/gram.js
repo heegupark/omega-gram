@@ -4,56 +4,69 @@ const sharp = require('sharp');
 const fs = require('fs');
 const Gram = require('../models/gram');
 const auth = require('../middleware/auth');
+const User = require('../models/user');
 const router = new express.Router();
-
+// POSTING
 router.post('/api/gram', auth, async (req, res) => {
-  const owner = req.user ? req.user._id : null;
-  const gram = new Gram({
-    ...req.body,
-    owner
-  });
+  const owner = req.user._id;
 
   try {
+    const user = await User.findOne({ _id: owner });
+    if (!user) {
+      return res.status(404).send();
+    }
+    const gram = new Gram({
+      ...req.body,
+      owner: user
+    });
     await gram.save();
+    // const newgram = await Gram.findOne({ ...req.body, owner }).populate('owner').exec();
+    // await newgram.save();
     res.status(201).send(gram);
   } catch (e) {
     res.status(400).send(e);
   }
 });
-
+// GET POSTS
 router.get('/api/gram', auth, async (req, res) => {
-  const match = {};
   const sort = {};
-  if (req.query.completed) {
-    match.completed = req.query.completed === 'true';
-    match.owner = null;
-  }
   if (req.query.sortBy) {
     const parts = req.query.sortBy.split(':');
     sort[parts[0]] = parts[1] === 'desc' ? -1 : 1;
   }
   try {
-    const gram = await Gram.find({ owner: req.user }).sort(sort).populate().exec();
-    res.send(gram);
+    const user = await User.findOne({ _id: req.user._id });
+    const followings = [];
+    user.followings.map(following => followings.push(following.following));
+    followings.push(user._id);
+    const gram = await Gram.find({ owner: { $in: followings } }).sort(sort).populate('owner').exec();
+    if (!gram) {
+      return res.status(404).send();
+    }
+    res.json(gram);
   } catch (e) {
     res.status(500).send(e);
   }
 });
-
+// GET SPECIFIC POST
 router.get('/api/gram/:id', auth, async (req, res) => {
   const _id = req.params.id;
+  const sort = {};
+  if (req.query.sortBy) {
+    const parts = req.query.sortBy.split(':');
+    sort[parts[0]] = parts[1] === 'desc' ? -1 : 1;
+  }
   try {
-    const gram = await Gram.findOne({ _id, owner: req.user._id });
-
+    const gram = await Gram.find({ owner: _id }).sort(sort).populate('owner').exec();
     if (!gram) {
       return res.status(404).send();
     }
-    res.send(gram);
+    res.json(gram);
   } catch (e) {
     res.status(500).send();
   }
 });
-
+// ADD A POST
 router.post('/api/gram/image/:path', auth, (req, res) => {
   const folder = `./server/public/gram/${req.params.path}`;
   if (!fs.existsSync(folder)) {
@@ -106,13 +119,11 @@ router.post('/api/gram/image/:path', auth, (req, res) => {
 
 router.patch('/api/gram/:id', auth, async (req, res) => {
   const updates = Object.keys(req.body);
-  const allowedUpdates = ['description', 'imgUrl', 'thumbnailImgUrl', 'completed'];
+  const allowedUpdates = ['description', 'imgUrl', 'thumbnailImgUrl'];
   const isValidOperation = updates.every(update => allowedUpdates.includes(update));
-
   if (!isValidOperation) {
     return res.status(400).send({ error: 'Invalid updates!' });
   }
-
   try {
     const gram = await Gram.findOne({ _id: req.params.id, owner: req.user._id });
     if (!gram) {
