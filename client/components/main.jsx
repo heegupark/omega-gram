@@ -48,6 +48,7 @@ class Main extends Component {
       updateNote,
       searchUserList,
       keyword,
+      message,
       getPosts,
       user,
       setPage,
@@ -110,6 +111,9 @@ class Main extends Component {
                       <p className="text-center">no notes at the moment</p>
                       <p className="text-center">{'why don\'t you start writing a small note?'}</p>
                       <p className="text-center">{'Or, follow someone to see their posts'}</p>
+
+                      <p className="text-center">do you want to follow?</p>
+
                     </>
                   )
                 // : (
@@ -130,6 +134,9 @@ class Main extends Component {
                         <button
                           className="btn btn-sm mx-1 text-primary sign-up-btn hover-black"
                           onClick={handleGuestSignIn}>enjoy as a guest</button>
+                      </div>
+                      <div className="text-center my-3">
+                        <p className="text-danger">{message}</p>
                       </div>
                     </>
                   )

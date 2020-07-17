@@ -33,7 +33,7 @@ class User extends Component {
   }
 
   getFollowers() {
-    const token = window.localStorage.getItem('omega-gram-token');
+    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     fetch('/api/followers', {
       method: 'GET',
       credentials: 'include',

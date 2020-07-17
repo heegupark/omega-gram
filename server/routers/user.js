@@ -15,7 +15,7 @@ router.post('/api/users', async (req, res) => {
     res.status(400).send(e);
   }
 });
-// GUEST SIGN UP
+// GUEST SIGN UP/IN
 router.get('/api/guest', async (req, res) => {
   const number = (Math.floor(100000 + Math.random() * 900000)).toString().substring(-2);
   const username = `guest${number}`;
@@ -24,9 +24,9 @@ router.get('/api/guest', async (req, res) => {
     // user.followings = user.followings.concat({ following: user._id });
     // await user.save();
     const token = await user.generateAuthToken();
-    res.status(201).send({ user, token });
+    res.status(201).send({ success: true, user, token });
   } catch (e) {
-    res.status(400).send({ message: '[server] failed to create a guest account' });
+    res.status(400).send({ success: false, message: 'failed to create a guest account. please try later.' });
   }
 });
 // SIGN IN
@@ -139,6 +139,15 @@ router.get('/api/followers', auth, async (req, res) => {
       return follower._id.toString() !== userId.toString();
     });
     res.json(followers);
+  } catch (e) {
+    res.status(400).send({ status: 'failed to get followers' });
+  }
+});
+// GET TOP GRAMMERS
+router.get('/api/grammers', async (req, res) => {
+  try {
+    const grammers = await User.find({ $query: {}, $sortByCount: { followings: -1 } }).limit(10);
+    res.json(grammers);
   } catch (e) {
     res.status(400).send({ status: 'failed to get followers' });
   }

@@ -38,7 +38,7 @@ class ChangePassword extends Component {
 
   handleChangeBtnClick(e) {
     e.preventDefault();
-    const token = window.localStorage.getItem('omega-gram-token');
+    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     const { newPassword, newPasswordConfirm } = this.state;
     if (newPassword.length < 1) {
       this.showMessage('new password is required', 1000);

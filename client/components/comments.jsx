@@ -41,7 +41,7 @@ class Comments extends Component {
   }
 
   handleWriteComment() {
-    const token = window.localStorage.getItem('omega-gram-token');
+    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     const { comment } = this.state;
     const { postId } = this.props;
     const body = { comment, postId };
@@ -77,7 +77,7 @@ class Comments extends Component {
   }
 
   getComments() {
-    const token = window.localStorage.getItem('omega-gram-token');
+    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     const { postId } = this.props;
     fetch(`/api/comments/${postId}`, {
       headers: {

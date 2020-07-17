@@ -20,6 +20,7 @@ class App extends Component {
       description: '',
       modalCategory: '',
       keyword: '',
+      message: '',
       selectedPostId: null,
       isSignedIn: false,
       isModalOpen: false,
@@ -27,7 +28,7 @@ class App extends Component {
       searchUserList: [],
       isUploading: false,
       isFirstLoading: true,
-      isDisclaimerAccepted: localStorage.getItem('omegagramaccept')
+      isDisclaimerAccepted: localStorage.getItem(process.env.DISCLAIMER_STRING)
     };
     this.setPage = this.setPage.bind(this);
     this.getUserInfo = this.getUserInfo.bind(this);
@@ -49,6 +50,7 @@ class App extends Component {
     this.handleDisclaimerAccept = this.handleDisclaimerAccept.bind(this);
     this.updateUserInfo = this.updateUserInfo.bind(this);
     this.guestSignIn = this.guestSignIn.bind(this);
+    this.showMessage = this.showMessage.bind(this);
   }
 
   componentDidMount() {
@@ -59,6 +61,13 @@ class App extends Component {
   componentWillUnmount() {
     this.setState = (state, callback) => {
     };
+  }
+
+  showMessage(message, time) {
+    setTimeout(() => {
+      this.setState({ message: '' });
+    }, time);
+    this.setState({ message });
   }
 
   handleDisclaimerAccept(accept) {
@@ -73,8 +82,10 @@ class App extends Component {
       user: user,
       posts: []
     });
-    this.getUserInfo();
-    this.getPosts(userId);
+    if (page === 'main') {
+      this.getUserInfo();
+      this.getPosts(userId);
+    }
   }
 
   setSignin() {
@@ -88,9 +99,13 @@ class App extends Component {
     fetch('/api/guest')
       .then(res => res.json())
       .then(data => {
-        window.localStorage.setItem('omega-gram-token', data.token);
-        this.setPage('main', data.user);
-        this.setSignin();
+        if (data.success) {
+          window.localStorage.setItem(process.env.AUTH_TOKEN_STRING, data.token);
+          this.setPage('main', data.user);
+          this.setSignin();
+        } else {
+          this.showMessage(data.message, 2000);
+        }
       })
       .catch(err => console.error(`Failed to create a guest account: ${err.message}`));
   }
@@ -108,7 +123,7 @@ class App extends Component {
 
   getPosts(userId) {
     this.clearSearchUserList();
-    const token = window.localStorage.getItem('omega-gram-token');
+    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     const url = userId ? `/api/gram/${userId}?sortBy=createdAt:desc` : '/api/gram/?sortBy=createdAt:desc';
     if (token) {
       fetch(url, {
@@ -130,7 +145,7 @@ class App extends Component {
   }
 
   addFollowing(userId) {
-    const token = window.localStorage.getItem('omega-gram-token');
+    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     fetch('/api/following', {
       method: 'POST',
       credentials: 'include',
@@ -152,7 +167,7 @@ class App extends Component {
   }
 
   stopFollowing(userId) {
-    const token = window.localStorage.getItem('omega-gram-token');
+    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     fetch('/api/stopfollowing', {
       method: 'POST',
       credentials: 'include',
@@ -174,7 +189,7 @@ class App extends Component {
   }
 
   updateUserInfo(body) {
-    const token = window.localStorage.getItem('omega-gram-token');
+    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     fetch('/api/users/me', {
       method: 'PATCH',
       headers: {
@@ -198,7 +213,7 @@ class App extends Component {
       isUploading: true
     });
     const _id = this.state.user._id;
-    const token = window.localStorage.getItem('omega-gram-token');
+    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     fetch(`/api/gram/image/${_id}`, {
       method: 'POST',
       headers: {
@@ -226,7 +241,7 @@ class App extends Component {
     this.setState({
       isUploading: true
     });
-    const token = window.localStorage.getItem('omega-gram-token');
+    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     fetch('/api/gram/', {
       method: 'POST',
       headers: {
@@ -253,7 +268,7 @@ class App extends Component {
   }
 
   updatePost(updatedNote) {
-    const token = window.localStorage.getItem('omega-gram-token');
+    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     const arr = [...this.state.posts];
     const newArr = arr.map(note => {
       if (note._id === updatedNote.id) {
@@ -293,7 +308,7 @@ class App extends Component {
   }
 
   deletePost() {
-    const token = window.localStorage.getItem('omega-gram-token');
+    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     const { selectedPostId, posts } = this.state;
     if (token) {
       fetch(`/api/gram/${selectedPostId}`, {
@@ -315,7 +330,7 @@ class App extends Component {
   }
 
   getUserInfo() {
-    const token = window.localStorage.getItem('omega-gram-token');
+    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     if (token) {
       fetch('/api/users/me', {
         method: 'GET',
@@ -336,7 +351,7 @@ class App extends Component {
   }
 
   signout() {
-    const token = window.localStorage.getItem('omega-gram-token');
+    const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     if (token) {
       fetch('/api/users/signout', {
         method: 'POST',
@@ -347,7 +362,7 @@ class App extends Component {
       })
         .then(res => res.json())
         .then(data => {
-          window.localStorage.removeItem('omega-gram-token');
+          window.localStorage.removeItem(process.env.AUTH_TOKEN_STRING);
           this.setSignout();
         })
         .catch(err => console.error(err.message));
@@ -448,6 +463,7 @@ class App extends Component {
       description,
       imgUrl,
       keyword,
+      message,
       isFirstLoading,
       searchUserList,
       thumbnailImgUrl,
@@ -471,6 +487,7 @@ class App extends Component {
             guestSignIn={guestSignIn}
             isFirstLoading={isFirstLoading}
             keyword={keyword}
+            message={message}
             posts={posts}/>
         );
         break;
