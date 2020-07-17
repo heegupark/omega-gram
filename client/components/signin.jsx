@@ -32,7 +32,7 @@ class Signin extends Component {
   handleSignupClick() {
     this.setState({
       mode: 'signup',
-      message: ''
+      message: 'Please DO NOT use real email address'
     });
   }
 
