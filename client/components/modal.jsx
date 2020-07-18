@@ -87,7 +87,8 @@ class Modal extends Component {
       selectedPostId,
       addImage,
       addPost,
-      updatePost
+      updatePost,
+      authToken
     } = this.props;
     let element = null;
     switch (modalCategory) {
@@ -150,6 +151,7 @@ class Modal extends Component {
           <ChangePassword
             // userId={user._id}
             user={user}
+            authToken={authToken}
             handleModalCancelClick={handleModalCancelClick}
           />
         );

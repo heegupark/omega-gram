@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import ReactTooltip from 'react-tooltip';
-const authToken = window.localStorage.getItem('omegagram-authtoken');
 
 class Like extends Component {
   constructor() {
@@ -60,7 +59,7 @@ class Like extends Component {
 
   handleLikeClick() {
     // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
-    const { userId, postId } = this.props;
+    const { userId, postId, authToken } = this.props;
     if (authToken) {
       fetch('/api/like', {
         method: 'PATCH',

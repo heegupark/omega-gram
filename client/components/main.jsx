@@ -52,7 +52,8 @@ class Main extends Component {
       getPosts,
       user,
       setPage,
-      isUploading
+      isUploading,
+      authToken
       // isFirstLoading
     } = this.props;
     const { handleInputClick, handleGoToSignIn, handleFollowBtnClick, handleGuestSignIn } = this;
@@ -82,7 +83,7 @@ class Main extends Component {
                   handleFollowBtnClick={handleFollowBtnClick}
                 />
               )
-              : posts.length > 0
+              : posts && posts.length > 0
                 ? posts.map(post => {
                   const { _id, description, imgUrl, thumbnailImgUrl, owner, updatedAt } = post;
                   return <Post
@@ -101,6 +102,7 @@ class Main extends Component {
                     closeModal={closeModal}
                     updateNote={updateNote}
                     keyword={keyword}
+                    authToken={authToken}
                     isUploading={isUploading} />;
                 })
                 : isSignedIn

@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 
-const authToken = window.localStorage.getItem('omegagram-authtoken');
-
 class ChangePassword extends Component {
   constructor() {
     super();
@@ -42,6 +40,7 @@ class ChangePassword extends Component {
     e.preventDefault();
     // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     const { newPassword, newPasswordConfirm } = this.state;
+    const { authToken } = this.props;
     if (newPassword.length < 1) {
       this.showMessage('new password is required', 1000);
     } else if (newPasswordConfirm.length < 1) {

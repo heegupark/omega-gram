@@ -3,7 +3,6 @@ import { Accordion, Card } from 'react-bootstrap';
 import BasicInformation from './basic-information';
 import Followings from './followings';
 import Followers from './followers';
-const authToken = window.localStorage.getItem('omegagram-authtoken');
 
 class User extends Component {
   constructor() {
@@ -35,6 +34,7 @@ class User extends Component {
 
   getFollowers() {
     // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    const { authToken } = this.props;
     if (authToken) {
       fetch('/api/followers', {
         method: 'GET',

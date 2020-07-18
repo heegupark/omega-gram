@@ -7,8 +7,6 @@ import Signin from './signin';
 import Modal from './modal';
 import Disclaimer from './disclaimer';
 
-const authToken = window.localStorage.getItem('omegagram-authtoken');
-
 class App extends Component {
   constructor(props) {
     super(props);
@@ -30,6 +28,7 @@ class App extends Component {
       searchUserList: [],
       isUploading: false,
       isFirstLoading: true,
+      authToken: window.localStorage.getItem('omegagram-authtoken'),
       isDisclaimerAccepted: localStorage.getItem('omegagramaccept')
     };
     this.setPage = this.setPage.bind(this);
@@ -56,8 +55,12 @@ class App extends Component {
   }
 
   componentDidMount() {
-    if (authToken) { this.getUserInfo(); }
-    if (this.state.isSignedIn) { this.getPosts(); }
+    const { authToken } = this.state;
+    if (authToken) {
+      this.getUserInfo();
+      this.setSignin();
+      this.getPosts();
+    }
   }
 
   componentWillUnmount() {
@@ -81,7 +84,7 @@ class App extends Component {
   setPage(page, user, userId) {
     this.setState({
       view: page,
-      user: user,
+      user: user || this.state.user,
       posts: []
     });
     if (page === 'main') {
@@ -102,7 +105,7 @@ class App extends Component {
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          window.localStorage.setItem('omegagram-autotoken', data.token);
+          window.localStorage.setItem('omegagram-authtoken', data.token);
           this.setPage('main', data.user);
           this.setSignin();
         } else {
@@ -118,29 +121,31 @@ class App extends Component {
       isSignedIn: false,
       posts: [],
       user: {},
-      view: 'main'
+      view: 'main',
+      authToken: ''
     });
-    this.getPosts();
+    // this.getPosts();
   }
 
   getPosts(userId) {
     this.clearSearchUserList();
-    // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     const url = userId ? `/api/gram/${userId}?sortBy=createdAt:desc` : '/api/gram/?sortBy=createdAt:desc';
+    const { authToken } = this.state;
     if (authToken) {
       fetch(url, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
           Authorization: `Bearer ${authToken}`
         }
       })
         .then(res => res.json())
         .then(data => {
-          this.setState({
-            posts: data,
-            isFirstLoading: false
-          });
+          if (data.success) {
+            this.setState({
+              posts: data.gram,
+              isFirstLoading: false
+            });
+          }
         })
         .catch(err => console.error(`No posts found: ${err.message}`));
     }
@@ -148,6 +153,7 @@ class App extends Component {
 
   addFollowing(userId) {
     // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    const { authToken } = this.state;
     if (authToken) {
       fetch('/api/following', {
         method: 'POST',
@@ -172,6 +178,8 @@ class App extends Component {
 
   stopFollowing(userId) {
     // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    const { authToken } = this.state;
+
     if (authToken) {
       fetch('/api/stopfollowing', {
         method: 'POST',
@@ -196,6 +204,8 @@ class App extends Component {
 
   updateUserInfo(body) {
     // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    const { authToken } = this.state;
+
     if (authToken) {
       fetch('/api/users/me', {
         method: 'PATCH',
@@ -222,6 +232,8 @@ class App extends Component {
     });
     const _id = this.state.user._id;
     // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    const { authToken } = this.state;
+
     if (authToken) {
       fetch(`/api/gram/image/${_id}`, {
         method: 'POST',
@@ -252,6 +264,8 @@ class App extends Component {
       isUploading: true
     });
     // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    const { authToken } = this.state;
+
     if (authToken) {
       fetch('/api/gram/', {
         method: 'POST',
@@ -290,6 +304,8 @@ class App extends Component {
       }
       return note;
     });
+    const { authToken } = this.state;
+
     if (authToken) {
       fetch(`/api/gram/${updatedNote.id}`, {
         method: 'PATCH',
@@ -321,7 +337,7 @@ class App extends Component {
 
   deletePost() {
     // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
-    const { selectedPostId, posts } = this.state;
+    const { selectedPostId, posts, authToken } = this.state;
     if (authToken) {
       fetch(`/api/gram/${selectedPostId}`, {
         method: 'DELETE',
@@ -343,6 +359,7 @@ class App extends Component {
 
   getUserInfo() {
     // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    const { authToken } = this.state;
     if (authToken) {
       fetch('/api/users/me', {
         method: 'GET',
@@ -357,7 +374,6 @@ class App extends Component {
             this.setState({
               user
             });
-            this.setSignin();
           }
         })
         .catch(err => console.error(err.message));
@@ -366,6 +382,8 @@ class App extends Component {
 
   signout() {
     // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    const { authToken } = this.state;
+
     if (authToken) {
       fetch('/api/users/signout', {
         method: 'POST',
@@ -376,8 +394,10 @@ class App extends Component {
       })
         .then(res => res.json())
         .then(data => {
-          window.localStorage.removeItem('omegagram-authtoken');
-          this.setSignout();
+          if (data.success) {
+            window.localStorage.removeItem('omegagram-authtoken');
+            this.setSignout();
+          }
         })
         .catch(err => console.error(err.message));
     }
@@ -482,6 +502,7 @@ class App extends Component {
       searchUserList,
       thumbnailImgUrl,
       isUploading,
+      authToken,
       isDisclaimerAccepted
     } = this.state;
     const username = user ? user.username : '';
@@ -502,6 +523,7 @@ class App extends Component {
             isFirstLoading={isFirstLoading}
             keyword={keyword}
             message={message}
+            authToken={authToken}
             posts={posts}/>
         );
         break;
@@ -514,6 +536,7 @@ class App extends Component {
             addFollowing={addFollowing}
             stopFollowing={stopFollowing}
             updateUserInfo={updateUserInfo}
+            authToken={authToken}
             posts={posts} />
         );
         break;
@@ -532,6 +555,7 @@ class App extends Component {
         <Header
           view={view}
           setPage={setPage}
+          // user={user}
           username={username}
           isSignedIn={isSignedIn}
           closeModal={closeModal}
@@ -562,6 +586,7 @@ class App extends Component {
             description={description}
             imgUrl={imgUrl}
             addPost={addPost}
+            authToken={authToken}
             thumbnailImgUrl={thumbnailImgUrl}
             isUploading={isUploading} />
           : ''

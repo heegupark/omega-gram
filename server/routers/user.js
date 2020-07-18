@@ -35,10 +35,10 @@ router.post('/api/users/signin', async (req, res) => {
     const user = await User.findByCredentials(req.body.email, req.body.password);
     await user.save();
     const token = await user.generateAuthToken();
-    res.status(200).json({ user, token });
+    res.status(200).json({ success: true, user, token });
   } catch (e) {
     // res.status(400).json({ message: 'failed to verify user credential.'})
-    res.status(400).json(e);
+    res.status(400).json({ success: false, message: e.message });
   }
 });
 // SIGN OUT
@@ -48,7 +48,7 @@ router.post('/api/users/signout', auth, async (req, res) => {
       return token.token !== req.token;
     });
     await req.user.save();
-    res.json({ status: 'signedout' });
+    res.json({ success: true, message: 'signedout' });
   } catch (e) {
     res.status(500).send(e);
   }

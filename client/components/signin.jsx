@@ -120,19 +120,25 @@ class Signin extends Component {
       body: JSON.stringify(credential)
     }).then(res => res.json())
       .then(data => {
-        this.setState({
-          isSigningIn: false
-        });
-        if (data.token && data.user) {
-          window.localStorage.setItem('omegagram-authtoken', data.token);
-          this.props.setPage('main', data.user);
-          this.props.setSignin();
-        } else {
+        if (data.success) {
           this.setState({
-            message: 'Please check your email and password.',
             isSigningIn: false
           });
-          this.inputEmail.current.focus();
+          if (data.token && data.user) {
+            window.localStorage.setItem('omegagram-authtoken', data.token);
+            this.props.setPage('main', data.user);
+            this.props.setSignin();
+          } else {
+            this.setState({
+              message: 'Please check your email and password.',
+              isSigningIn: false
+            });
+            this.inputEmail.current.focus();
+          }
+        } else {
+          this.setState({
+            message: data.message
+          });
         }
       })
       .catch(err => {

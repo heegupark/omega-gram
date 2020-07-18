@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 // import socketio from 'socket.io-client';
 // const socket = socketio.connect('http://localhost:3001');
-const authToken = window.localStorage.getItem('omegagram-authtoken');
 
 class Comments extends Component {
   constructor() {
@@ -44,7 +43,7 @@ class Comments extends Component {
   handleWriteComment() {
     // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     const { comment } = this.state;
-    const { postId } = this.props;
+    const { postId, authToken } = this.props;
     const body = { comment, postId };
     if (comment.length < 2) {
       setTimeout(() => {
@@ -81,7 +80,7 @@ class Comments extends Component {
 
   getComments() {
     // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
-    const { postId } = this.props;
+    const { postId, authToken } = this.props;
     fetch(`/api/comments/${postId}`, {
       headers: {
         Authorization: `Bearer ${authToken}`

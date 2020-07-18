@@ -30,22 +30,28 @@ router.post('/api/gram', auth, async (req, res) => {
 // GET POSTS
 router.get('/api/gram', auth, async (req, res) => {
   const sort = {};
+  const followings = [];
   if (req.query.sortBy) {
     const parts = req.query.sortBy.split(':');
     sort[parts[0]] = parts[1] === 'desc' ? -1 : 1;
   }
   try {
     const user = await User.findOne({ _id: req.user._id });
-    const followings = [];
-    user.followings.map(following => followings.push(following.following));
+    if (!user) {
+      return res.status(400).json({ success: false, message: 'failed to find a user' });
+    }
+    const findFollowings = await user.followings.map(following => followings.push(following.following));
     followings.push(user._id);
+    if (!findFollowings) {
+      return res.status(401).json({ success: false, message: 'failed to find followings' });
+    }
     const gram = await Gram.find({ owner: { $in: followings } }).sort(sort).populate('owner').exec();
     if (!gram) {
-      return res.status(404).send();
+      return res.status(404).json({ success: false, message: 'failed to find posts' });
     }
-    res.json(gram);
+    return res.json({ success: true, gram: gram });
   } catch (e) {
-    res.status(500).send(e);
+    return res.status(500).json({ success: false, message: e.message });
   }
 });
 // GET SPECIFIC POST

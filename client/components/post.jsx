@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Like from './like';
 import Comments from './comments';
+
 class Post extends Component {
   constructor(props) {
     super(props);
@@ -121,7 +122,8 @@ class Post extends Component {
       description,
       updatedAt,
       keyword,
-      getPosts
+      getPosts,
+      authToken
     } = this.props;
     const {
       isImgLoaded,
@@ -178,6 +180,7 @@ class Post extends Component {
           <div className="mx-auto post-image">
             <Like
               postId={_id}
+              authToken={authToken}
               username={user.username}
               userId={user._id} />
             <div className="d-flex">
@@ -215,6 +218,7 @@ class Post extends Component {
             <div>
               <Comments
                 postId={_id}
+                authToken={authToken}
                 userId={user._id}
                 getPosts={getPosts}
               />
