@@ -33,8 +33,7 @@ class User extends Component {
   }
 
   getFollowers() {
-    // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
-    const { authToken } = this.props;
+    const authToken = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
     if (authToken) {
       fetch('/api/followers', {
         method: 'GET',
@@ -69,7 +68,7 @@ class User extends Component {
             <p className="h4">user profile</p>
           </div>
         </div>
-        <Accordion defaultActiveKey="0">
+        <Accordion defaultActiveKey="0" className="mx-auto w-accordion">
           <Card>
             <Accordion.Toggle as={Card.Header} eventKey="0" className="cursor">
               basic information

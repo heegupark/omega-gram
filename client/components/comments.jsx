@@ -41,9 +41,9 @@ class Comments extends Component {
   }
 
   handleWriteComment() {
-    // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    const authToken = window.localStorage.getItem('omegagram-authtoken');
     const { comment } = this.state;
-    const { postId, authToken } = this.props;
+    const { postId } = this.props;
     const body = { comment, postId };
     if (comment.length < 2) {
       setTimeout(() => {
@@ -79,8 +79,8 @@ class Comments extends Component {
   }
 
   getComments() {
-    // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
-    const { postId, authToken } = this.props;
+    const authToken = window.localStorage.getItem('omegagram-authtoken');
+    const { postId } = this.props;
     fetch(`/api/comments/${postId}`, {
       headers: {
         Authorization: `Bearer ${authToken}`

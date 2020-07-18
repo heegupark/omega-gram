@@ -58,8 +58,8 @@ class Like extends Component {
   }
 
   handleLikeClick() {
-    // const token = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
-    const { userId, postId, authToken } = this.props;
+    const authToken = window.localStorage.getItem('omegagram-authtoken');
+    const { userId, postId } = this.props;
     if (authToken) {
       fetch('/api/like', {
         method: 'PATCH',

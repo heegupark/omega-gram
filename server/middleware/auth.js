@@ -5,7 +5,7 @@ const auth = async (req, res, next) => {
   try {
     const token = req.header('Authorization').replace('Bearer ', '');
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await (await User.findOne({ _id: decoded._id, 'tokens.token': token }).populate('followings.following').exec());
+    const user = await User.findOne({ _id: decoded._id, 'tokens.token': token }).populate('followings.following').exec();
     // const user = await User.findOne({ _id: decoded._id, 'tokens.token': token }).populate('followings.following').exec();
     if (!user) {
       throw new Error();

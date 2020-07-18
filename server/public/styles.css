@@ -163,8 +163,8 @@ main {
 }
 
 .search-cancel-btn{
-  left: 72%;
-  top: 5%;
+  left: 71%;
+  top: 10px;
   font-size: 24px;
 }
 
@@ -193,6 +193,10 @@ main {
 .search-icon {
   font-size: 20px;
   margin-top: 5px;
+}
+
+.w-accordion {
+  width: 60%;
 }
 
 .hover-black:hover {
@@ -239,8 +243,8 @@ main {
   }
 }
 
-.topdown-animation{
-  animation: top-down 0.2s ease-in;
+.topdown-animation {
+  animation: top-down 0.1s ease-in;
 }
 
 @keyframes top-down {
@@ -356,6 +360,10 @@ main {
 
   .search-cancel-btn{
     left: 95%;
+  }
+
+  .w-accordion {
+    width: 100%;
   }
 
   .username {

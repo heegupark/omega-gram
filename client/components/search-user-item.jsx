@@ -9,8 +9,8 @@ class SearchUserItem extends Component {
     this.handleFollowBtnClick = this.handleFollowBtnClick.bind(this);
   }
 
-  handleFollowBtnClick() {
-    this.props.handleFollowBtnClick();
+  handleFollowBtnClick(e) {
+    this.props.addFollowing(e.target.id);
   }
 
   render() {
@@ -19,8 +19,8 @@ class SearchUserItem extends Component {
       isFollowing,
       handleUsernameClick
     } = this.props;
-    const { handleFollowBtnClick } = this;
     const { isUpdating } = this.state;
+    const { handleFollowBtnClick } = this;
     return (
       <div>
         <div className="row mx-auto my-2">

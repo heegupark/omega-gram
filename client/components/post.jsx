@@ -122,8 +122,7 @@ class Post extends Component {
       description,
       updatedAt,
       keyword,
-      getPosts,
-      authToken
+      getPosts
     } = this.props;
     const {
       isImgLoaded,
@@ -180,7 +179,6 @@ class Post extends Component {
           <div className="mx-auto post-image">
             <Like
               postId={_id}
-              authToken={authToken}
               username={user.username}
               userId={user._id} />
             <div className="d-flex">
@@ -218,7 +216,6 @@ class Post extends Component {
             <div>
               <Comments
                 postId={_id}
-                authToken={authToken}
                 userId={user._id}
                 getPosts={getPosts}
               />

@@ -2,6 +2,7 @@ const express = require('express');
 const User = require('../models/user');
 const auth = require('../middleware/auth');
 const { sendWelcomeEmail } = require('../emails/account');
+const Gram = require('../models/gram');
 const router = new express.Router();
 // SIGN UP
 router.post('/api/users', async (req, res) => {
@@ -144,12 +145,46 @@ router.get('/api/followers', auth, async (req, res) => {
   }
 });
 // GET TOP GRAMMERS
-router.get('/api/grammers', async (req, res) => {
+router.get('/api/grammers', auth, async (req, res) => {
+  const limit = req.query.limit;
+  const skip = req.query.skip;
   try {
-    const grammers = await User.find({ $query: {}, $sortByCount: { followings: -1 } }).limit(10);
-    res.json(grammers);
+    const grammers = await Gram.aggregate([
+      { $group: { _id: '$owner', count: { $sum: 1 } } },
+      {
+        $lookup:
+        {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'userInfo'
+        }
+      },
+      { $sort: { count: -1 } }
+    ]).limit(Number(limit)).skip(Number(skip)).exec();
+    if (!grammers) {
+      return res.status(400).json({ success: false, message: 'failed to find top grammers' });
+    }
+    res.json({ success: true, data: grammers });
   } catch (e) {
-    res.status(400).send({ status: 'failed to get followers' });
+    return res.status(500).send({ success: false, message: 'failed to get followers' });
+  }
+});
+// GET TOP FOLLOWERS
+router.get('/api/followers', auth, async (req, res) => {
+  const limit = req.query.limit;
+  const skip = req.query.skip;
+  try {
+    const followers = await User.aggregate([
+      { $group: { _id: '$followings.follow._id', count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]).limit(Number(limit)).skip(Number(skip)).exec();
+    if (!followers) {
+      return res.status(400).json({ success: false, message: 'failed to find top followers' });
+    }
+    res.json({ success: true, data: followers });
+  } catch (e) {
+    return res.status(500).send({ success: false, message: 'failed to get followers' });
   }
 });
 // FIND USERS

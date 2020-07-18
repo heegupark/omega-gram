@@ -127,7 +127,7 @@ class Signin extends Component {
           if (data.token && data.user) {
             window.localStorage.setItem('omegagram-authtoken', data.token);
             this.props.setPage('main', data.user);
-            this.props.setSignin();
+            this.props.setSignin(data.token);
           } else {
             this.setState({
               message: 'Please check your email and password.',

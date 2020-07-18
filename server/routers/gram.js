@@ -29,6 +29,8 @@ router.post('/api/gram', auth, async (req, res) => {
 });
 // GET POSTS
 router.get('/api/gram', auth, async (req, res) => {
+  const limit = req.query.limit;
+  const skip = req.query.skip;
   const sort = {};
   const followings = [];
   if (req.query.sortBy) {
@@ -45,7 +47,7 @@ router.get('/api/gram', auth, async (req, res) => {
     if (!findFollowings) {
       return res.status(401).json({ success: false, message: 'failed to find followings' });
     }
-    const gram = await Gram.find({ owner: { $in: followings } }).sort(sort).populate('owner').exec();
+    const gram = await Gram.find({ owner: { $in: followings } }).sort(sort).populate('owner').limit(Number(limit)).skip(Number(skip)).exec();
     if (!gram) {
       return res.status(404).json({ success: false, message: 'failed to find posts' });
     }
@@ -56,6 +58,8 @@ router.get('/api/gram', auth, async (req, res) => {
 });
 // GET SPECIFIC POST
 router.get('/api/gram/:id', auth, async (req, res) => {
+  const limit = req.query.limit;
+  const skip = req.query.skip;
   const _id = req.params.id;
   const sort = {};
   if (req.query.sortBy) {
@@ -63,13 +67,13 @@ router.get('/api/gram/:id', auth, async (req, res) => {
     sort[parts[0]] = parts[1] === 'desc' ? -1 : 1;
   }
   try {
-    const gram = await Gram.find({ owner: _id }).sort(sort).populate('owner').exec();
+    const gram = await Gram.find({ owner: _id }).sort(sort).populate('owner').limit(Number(limit)).skip(Number(skip)).exec();
     if (!gram) {
       return res.status(404).send();
     }
-    res.json(gram);
+    return res.json({ success: true, gram: gram });
   } catch (e) {
-    res.status(500).send();
+    return res.status(500).send();
   }
 });
 // ADD A POST

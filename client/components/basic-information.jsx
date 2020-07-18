@@ -120,6 +120,13 @@ class BasicInformation extends Component {
                 </div>
               </div>
               <div className="row h-40">
+                <div className="col my-auto">password:</div>
+                <div className="col my-auto p-23">
+                  <div
+                    className="text-danger border-0">change password</div>
+                </div>
+              </div>
+              <div className="row h-40">
                 <div className="col my-auto">member since:</div>
                 <div className="col my-auto p-23">{user ? `${new Date(user.createdAt).toLocaleDateString()}` : ''}</div>
               </div>
@@ -155,7 +162,6 @@ class BasicInformation extends Component {
                       </>
                     )
                   }
-
                 </div>
               </div>
             </div>
