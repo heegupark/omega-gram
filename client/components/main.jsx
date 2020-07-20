@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Post from './post';
+import Input from './input';
 
 class Main extends Component {
   constructor(props) {
@@ -56,15 +57,11 @@ class Main extends Component {
     return (
       <main>
         <div className="row my-3 mx-auto fixed-top bg-white input-box">
-          <div className="col-sm mx-auto input-group">
-            <textarea
-              rows="2"
-              style={{ display: isSignedIn ? '' : 'none' }}
-              className="form-control resize-none input-text"
-              type="text"
-              onClick={handleInputClick}
-              placeholder={isUploading ? 'writing...' : 'what do you have today?'}/>
-          </div>
+          <Input
+            isSignedIn={isSignedIn}
+            isUploading={isUploading}
+            handleInputClick={handleInputClick}
+          />
         </div>
         <div
           className='row mx-auto post-box'>

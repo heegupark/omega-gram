@@ -140,7 +140,7 @@ main {
   width: 100%;
   color: black;
   background-color: white;
-  padding: 0.8px;
+  padding: 1px;
 }
 
 .note-edit-custom > textarea {

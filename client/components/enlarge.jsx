@@ -10,11 +10,11 @@ class Enlarge extends Component {
     return (
       <>
         <div className="text-center mb-1">
-          <div className="row mx-auto rounded note-edit-custom">
+          <div className="mx-auto rounded note-edit-custom">
             <div className="mx-auto">
               <img
                 alt=""
-                className="img-fluid rounded"
+                className="w-100 img-fluid rounded"
                 src={imgUrl}
               />
             </div>

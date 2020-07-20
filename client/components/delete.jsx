@@ -16,12 +16,12 @@ class Delete extends Component {
         <div className="text-center my-1">
           <p className="mt-3">Do you really want to delete this post?</p>
         </div>
-        <div className="row mx-auto rounded note-edit-custom">
+        <div className="mx-auto rounded note-edit-custom">
           {imgUrl
             ? (
               <img
                 alt=""
-                className="img-fluid mx-auto img-thumbnail rounded"
+                className="w-100 img-fluid mx-auto img-thumbnail rounded"
                 src={imgUrl}
               />
             )

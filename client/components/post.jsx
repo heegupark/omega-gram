@@ -157,7 +157,7 @@ class Post extends Component {
                   <img
                     alt=""
                     className="img-fluid rounded cursor hover-bigger"
-                    src={thumbnailImgUrl}
+                    src={thumbnailImgUrl || imgUrl}
                     onLoad={() => this.setState({ isImgLoaded: true })}
                     style={isImgLoaded ? {} : { display: 'none' }}
                     onClick={handlePostClick}></img>

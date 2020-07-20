@@ -21,8 +21,6 @@ router.post('/api/gram', auth, async (req, res) => {
       owner: user
     });
     await gram.save();
-    // const newgram = await Gram.findOne({ ...req.body, owner }).populate('owner').exec();
-    // await newgram.save();
     res.status(201).send(gram);
   } catch (e) {
     res.status(400).send(e);
@@ -110,10 +108,16 @@ router.post('/api/gram/image/:path', auth, (req, res) => {
       });
     } else {
       try {
-        sharp(req.file.path)
-          .resize({ width: 300 })
-          .withMetadata()
-          .toFile(`${folder}/thumbnail-${req.file.filename}`);
+        if (!req.file.originalname.match(/\.(gif|GIF)$/)) {
+          sharp(req.file.path)
+            .resize({ width: 500 })
+            .withMetadata()
+            .toFile(`${folder}/thumbnail-${req.file.filename}`);
+        } else {
+          fs.copyFile(`${folder}/${req.file.filename}`, `${folder}/thumbnail-${req.file.filename}`, err => {
+            if (err) throw err;
+          });
+        }
         return res.status(201).json({
           message: 'File uploaded and resized successfully',
           filename: `thumbnail-${req.file.filename}`
