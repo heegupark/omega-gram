@@ -73,12 +73,9 @@ class Create extends Component {
       this.showMessage('anything fun today?', 1000);
     } else {
       const { user, addImage, addPost } = this.props;
-      // const pathArr = imgUrl.split('/');
-      // const altFilename = pathArr[pathArr.length - 1];
-      // const changedImageName = fileName ? `${fileName.split(' ').join('')}` : '';
       const fileNameSplit = fileName ? fileName.split('.') : '';
       const extention = fileNameSplit[fileNameSplit.length - 1];
-      const randomFileName = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      const randomFileName = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
       const changedImageName = fileName ? `${randomFileName}.${extention}` : '';
       const form = new FormData();
       const post = {
