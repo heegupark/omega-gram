@@ -8,7 +8,6 @@ const staticMiddleware = require('./static-middleware');
 const ClientError = require('./client-error');
 const express = require('express');
 const app = express();
-// const cors = require('cors');
 const https = require('https');
 const fs = require('fs');
 app.use(staticMiddleware);
@@ -17,7 +16,6 @@ app.use(userRouter);
 app.use(gramRouter);
 app.use(likeRouter);
 app.use(commentRouter);
-// app.use(cors());
 app.use((err, req, res, next) => {
   if (err instanceof ClientError) {
     res.status(err.status).json({ error: err.message });

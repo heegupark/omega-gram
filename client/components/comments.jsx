@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-// import socketio from 'socket.io-client';
-// const socket = socketio.connect('http://localhost:3001');
 
 class Comments extends Component {
   constructor() {
@@ -66,7 +64,7 @@ class Comments extends Component {
         }).then(res => res.json())
           .then(result => {
             this.setState({
-              comments: result.comments,
+              comments: [...this.state.comments, result.comments],
               comment: '',
               viewComment: true
             });
@@ -123,7 +121,7 @@ class Comments extends Component {
                             <td style={{ width: '40%' }}>
                               <span
                                 id={comment.userId._id}
-                                className="my-auto cursor hover-blue comment-username"
+                                className={`my-auto cursor hover-blue italic ${isMe ? 'bold' : ''}`}
                                 onClick={handleUsernameClick}
                               >{`${comment.userId.username}${isMe ? ' (me)' : ''}`}</span>
                             </td>
@@ -147,7 +145,7 @@ class Comments extends Component {
                       <span
                         className="cursor"
                         onClick={handleViewCommentToggle}
-                      >{`hide comment${comments.length > 1 ? 's' : ''}`}</span>
+                      >{`hide ${comments.length} comment${comments.length > 1 ? 's' : ''}`}</span>
                     </td>
                   </tr>
                 </tbody>
@@ -181,13 +179,13 @@ class Comments extends Component {
                 <div className="input-group">
                   <input
                     name="comment"
-                    className="form-control h-30 rounded my-2"
+                    className="form-control rounded my-2"
                     value={comment}
                     placeholder={message}
                     onChange={handleInputChange}
                   />
                   <button
-                    className="my-auto btn btn-outline-secondary h-30 border-0"
+                    className="my-auto btn btn-outline-secondary border-0"
                     type="button"
                     onClick={handleWriteComment}>
                     <i className="fas fa-pen-alt"></i>

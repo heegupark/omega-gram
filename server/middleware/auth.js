@@ -12,11 +12,9 @@ const auth = async (req, res, next) => {
     }
     req.token = token;
     req.user = user;
-    next();
+    return next();
   } catch (e) {
-    req.user = null;
-    next();
-    res.status(401).json({ error: 'Please authenticate.' });
+    return res.status(401).json({ error: 'Please authenticate.' });
   }
 };
 

@@ -6,6 +6,7 @@ const Gram = require('../models/gram');
 const auth = require('../middleware/auth');
 const User = require('../models/user');
 const router = new express.Router();
+
 // POSTING
 router.post('/api/gram', auth, async (req, res) => {
   const owner = req.user._id;

@@ -54,9 +54,12 @@ main {
   right: 0;
 }
 
-.comment-username {
-  font-weight: bold;
+.italic {
   font-style: italic;
+}
+
+.bold {
+  font-weight: bold;
 }
 
 .h-54 {
