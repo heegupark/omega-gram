@@ -67,7 +67,8 @@ class Intro extends Component {
             <Accordion defaultActiveKey="0" className="mx-auto w-accordion">
               <Card>
                 <Accordion.Toggle as={Card.Header} eventKey="0" className="cursor">
-                    top posters
+                  top posters
+                  <span className="ml-2 text-warning">{'*click name to view their posts or follow!'}</span>
                 </Accordion.Toggle>
                 <Accordion.Collapse eventKey="0">
                   <Card.Body>
@@ -80,7 +81,8 @@ class Intro extends Component {
               </Card>
               <Card>
                 <Accordion.Toggle as={Card.Header} eventKey="1" className="cursor">
-                    top followings
+                  top followings
+                  <span className="ml-2 text-warning">{'*click name to view their posts or follow!'}</span>
                 </Accordion.Toggle>
                 <Accordion.Collapse eventKey="1">
                   <Card.Body>

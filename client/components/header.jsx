@@ -135,6 +135,7 @@ class Header extends Component {
                   <div className="col my-auto text-center logo-box">
                     <img className="omega-logo mr-1 mb-1" src="images/o-logo.png" />
                     <div className="navbar-brand text-white mx-auto omega-note hover-blue" onClick={handleLogoClick}>gram</div>
+                    <span className="badge badge-warning ml-1 pb-0">beta</span>
                   </div>
                 </div>
                 <div className="signin-box" style={{ display: displayStyle }}>

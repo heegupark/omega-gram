@@ -57,31 +57,46 @@ class TopGrammers extends Component {
     return (
       <table className="mx-auto w-100">
         <tbody>
-          {grammers.map(grammer => {
-            return (
-              <tr key={grammer._id}>
-                <td className="text-center">
-                  <span
-                    id={grammer._id}
-                    className="cursor hover-blue"
-                    onClick={handleUsernameClick}>{grammer.userInfo[0].username}
-                  </span>
-                </td>
-                <td className="text-center">
-                  <span>{`${grammer.count} post${grammer.count > 1 ? 's' : ''}`}
-                  </span>
-                </td>
-                <td className="text-center">
-                  <span>
-                    <div
-                      id={grammer._id}
-                      className="text-warning cursor hover-black"
-                      onClick={handleFollowBtnClick}>follow</div>
-                  </span>
+          {grammers.length
+            ? (
+              grammers.map(grammer => {
+                return (
+                  <tr key={grammer._id}>
+                    <td className="text-center">
+                      <span
+                        id={grammer._id}
+                        className="cursor hover-blue"
+                        onClick={handleUsernameClick}>{grammer.userInfo[0].username}
+                      </span>
+                    </td>
+                    <td className="text-center">
+                      <span>{`${grammer.count} post${grammer.count > 1 ? 's' : ''}`}
+                      </span>
+                    </td>
+                    <td className="text-center">
+                      <span>
+                        <div
+                          id={grammer._id}
+                          className="text-warning cursor hover-black"
+                          onClick={handleFollowBtnClick}>follow</div>
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })
+            )
+            : (
+              <tr>
+                <td>
+                  <div className="text-center">
+                    {'click '}
+                    <span className="text-primary text-center cursor hover-black" onClick={handleUsernameClick}>{'here'}</span>
+                    {' to start enjoying o-gram!!!'}
+                  </div>
                 </td>
               </tr>
-            );
-          })}
+            )
+          }
         </tbody>
       </table>
     );

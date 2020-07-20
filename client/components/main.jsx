@@ -108,9 +108,11 @@ class Main extends Component {
                         onClick={handleGoToSignIn}>go to signin</button>
                     </div>
                     <div className="text-center my-3">
+                      <span className="click-here-left text-warning">{'click here ->'}</span>
                       <button
                         className="btn btn-sm mx-1 text-primary sign-up-btn hover-black"
                         onClick={handleGuestSignIn}>enjoy as a guest</button>
+                      <span className="click-here-right text-warning">{'<- click here'}</span>
                     </div>
                     <div className="text-center my-3">
                       <p className="text-danger">{message}</p>
