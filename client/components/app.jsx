@@ -264,10 +264,12 @@ class App extends Component {
         body: form
       }).then(res => res.json())
         .then(data => {
-          if (category === 'create') {
-            this.addPost(post);
-          } else if (category === 'update') {
-            this.updatePost(post);
+          if (data.success) {
+            if (category === 'create') {
+              this.addPost(post);
+            } else if (category === 'update') {
+              this.updatePost(post);
+            }
           }
         })
         .catch(err => {

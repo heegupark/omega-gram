@@ -11,10 +11,7 @@ class Delete extends Component {
     return (
       <>
         <div className="text-center bg-dark">
-          <p className="h5 mt-3 text-white">delete a post</p>
-        </div>
-        <div className="text-center my-1">
-          <p className="mt-3">Do you really want to delete this post?</p>
+          <p className="h5 mt-3 text-white">Do you really want to delete this post?</p>
         </div>
         <div className="mx-auto rounded note-edit-custom">
           {imgUrl

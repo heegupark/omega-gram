@@ -69,10 +69,10 @@ class Create extends Component {
   handleCreatePostClick() {
     event.preventDefault();
     const { file, fileName, description } = this.state;
+    const { user, addImage, addPost } = this.props;
     if (!description) {
       this.showMessage('anything fun today?', 1000);
     } else {
-      const { user, addImage, addPost } = this.props;
       const fileNameSplit = fileName ? fileName.split('.') : '';
       const extention = fileNameSplit[fileNameSplit.length - 1];
       const randomFileName = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);

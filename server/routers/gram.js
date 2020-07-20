@@ -107,25 +107,39 @@ router.post('/api/gram/image/:path', auth, (req, res) => {
         message: `Failed to upload an image:${error.message}`
       });
     } else {
-      try {
-        if (!req.file.originalname.match(/\.(gif|GIF)$/)) {
+      if (!req.file.originalname.match(/\.(gif|GIF)$/)) {
+        try {
           sharp(req.file.path)
             .resize({ width: 500 })
             .withMetadata()
             .toFile(`${folder}/thumbnail-${req.file.filename}`);
-        } else {
+          return res.status(201).json({
+            success: true,
+            message: 'File uploaded and resized successfully',
+            filename: `thumbnail-${req.file.filename}`
+          });
+        } catch (error) {
+          return res.status(400).json({
+            success: false,
+            message: `Failed to resize an image:${error.message}`
+          });
+        }
+      } else {
+        try {
           fs.copyFile(`${folder}/${req.file.filename}`, `${folder}/thumbnail-${req.file.filename}`, err => {
             if (err) throw err;
           });
+          return res.status(201).json({
+            success: true,
+            message: 'File uploaded and resized successfully',
+            filename: `thumbnail-${req.file.filename}`
+          });
+        } catch (error) {
+          return res.status(400).json({
+            success: false,
+            message: `Failed to resize a gif image:${error.message}`
+          });
         }
-        return res.status(201).json({
-          message: 'File uploaded and resized successfully',
-          filename: `thumbnail-${req.file.filename}`
-        });
-      } catch (error) {
-        return res.status(400).json({
-          message: `Failed to resize an image:${error.message}`
-        });
       }
       // return res.status(200).json({ message: 'File uploaded successfully'});
     }
