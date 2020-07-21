@@ -23,6 +23,7 @@ router.post('/api/comment', auth, async (req, res) => {
       const newResult = result.comments.filter(comment => {
         return comment.userId._id.toString() === userId.toString();
       });
+      req.io.sockets.emit(`comment-${postId}`, { comments: newResult[newResult.length - 1] });
       res.status(201).send({ success: true, comments: newResult[newResult.length - 1] });
     } catch (e) {
       res.status(400).json({ success: false, message: 'failed to comment' });

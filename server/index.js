@@ -8,14 +8,33 @@ const staticMiddleware = require('./static-middleware');
 const ClientError = require('./client-error');
 const express = require('express');
 const app = express();
-const https = require('https');
 const fs = require('fs');
+const https = require('https');
 app.use(staticMiddleware);
 app.use(express.json());
+// for socket communication
+const http = require('http');
+const socketIo = require('socket.io');
+const server = http.createServer(app);
+const io = socketIo(server);
+io.on('connection', socket => {
+  // eslint-disable-next-line no-console
+  console.log('New client connected');
+  socket.on('disconnect', () => {
+    // eslint-disable-next-line no-console
+    console.log('Client disconnected');
+  });
+});
+app.use(function (req, res, next) {
+  req.io = io;
+  next();
+});
+// Routing
 app.use(userRouter);
 app.use(gramRouter);
 app.use(likeRouter);
 app.use(commentRouter);
+// for error handling
 app.use((err, req, res, next) => {
   if (err instanceof ClientError) {
     res.status(err.status).json({ error: err.message });
@@ -27,7 +46,7 @@ app.use((err, req, res, next) => {
   }
 });
 if (process.env.ENV === 'DEV') {
-  app.listen(process.env.PORT, () => {
+  server.listen(process.env.PORT, () => {
     // eslint-disable-next-line no-console
     console.log('[http] Server listening on port', process.env.PORT);
   });
