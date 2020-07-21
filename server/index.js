@@ -8,6 +8,7 @@ const staticMiddleware = require('./static-middleware');
 const ClientError = require('./client-error');
 const express = require('express');
 const app = express();
+const cors = require('cors');
 const fs = require('fs');
 const https = require('https');
 app.use(staticMiddleware);
@@ -25,6 +26,7 @@ io.on('connection', socket => {
     console.log('Client disconnected');
   });
 });
+app.use(cors());
 app.use(function (req, res, next) {
   req.io = io;
   next();
