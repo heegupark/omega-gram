@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import socketIOClient from 'socket.io-client';
-const ENDPOINT = 'http://localhost:3001/';
+// import socketIOClient from 'socket.io-client';
+// const ENDPOINT = 'http://localhost:3001/';
 
 class Comments extends Component {
   constructor() {
@@ -20,12 +20,12 @@ class Comments extends Component {
 
   componentDidMount() {
     this.getComments();
-    const socket = socketIOClient(ENDPOINT);
-    socket.on(`comment-${this.props.postId}`, data => {
-      this.setState({
-        comments: [...this.state.comments, data.comments]
-      });
-    });
+    // const socket = socketIOClient(ENDPOINT);
+    // socket.on(`comment-${this.props.postId}`, data => {
+    //   this.setState({
+    //     comments: [...this.state.comments, data.comments]
+    //   });
+    // });
   }
 
   handleViewCommentToggle() {
@@ -71,15 +71,15 @@ class Comments extends Component {
           body: JSON.stringify(body)
         }).then(res => res.json())
           .then(result => {
-            // this.setState({
-            //   comments: [...this.state.comments, result.comments],
-            //   comment: '',
-            //   viewComment: true
-            // });
             this.setState({
+              comments: [...this.state.comments, result.comments],
               comment: '',
               viewComment: true
             });
+            // this.setState({
+            //   comment: '',
+            //   viewComment: true
+            // });
           })
           .catch(err => {
             console.error('failed to comment', err.message);
