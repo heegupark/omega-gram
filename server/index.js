@@ -17,6 +17,10 @@ const http = require('http');
 const socketIo = require('socket.io');
 const server = http.createServer(app);
 const io = socketIo(server);
+app.use(function (req, res, next) {
+  req.io = io;
+  next();
+});
 io.on('connection', socket => {
   // eslint-disable-next-line no-console
   console.log('New client connected');
@@ -24,10 +28,6 @@ io.on('connection', socket => {
     // eslint-disable-next-line no-console
     console.log('Client disconnected');
   });
-});
-app.use(function (req, res, next) {
-  req.io = io;
-  next();
 });
 // Routing
 app.use(userRouter);
