@@ -61,3 +61,10 @@
 * You can see and test the live version here: <a href="https://gram.heegu.net" target="blank">gram.heegu.net</a>
 
 ## Screen shot
+[Desktop]
+
+![Omega Gram](https://github.com/heegupark/omega-gram/blob/master/gram-ss-001.gif)
+
+[Real Time Comments]
+
+![Omega Gram](https://github.com/heegupark/omega-gram/blob/master/gram-ss-004.gif)
