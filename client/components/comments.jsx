@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import socketIOClient from 'socket.io-client';
-const ENDPOINT = '/';
 
 class Comments extends Component {
   constructor() {
@@ -20,7 +19,7 @@ class Comments extends Component {
 
   componentDidMount() {
     this.getComments();
-    const socket = socketIOClient(ENDPOINT);
+    const socket = socketIOClient('/');
     socket.on(`comment-${this.props.postId}`, data => {
       this.setState({
         comments: [...this.state.comments, data.comments]

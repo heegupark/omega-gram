@@ -8,8 +8,6 @@ const staticMiddleware = require('./static-middleware');
 const ClientError = require('./client-error');
 const express = require('express');
 const app = express();
-const fs = require('fs');
-const https = require('https');
 app.use(staticMiddleware);
 app.use(express.json());
 // for socket communication
@@ -22,14 +20,12 @@ app.use(function (req, res, next) {
   next();
 });
 io.on('connection', socket => {
-  // eslint-disable-next-line no-console
-  console.log('New client connected');
   socket.on('disconnect', () => {
     // eslint-disable-next-line no-console
     console.log('Client disconnected');
   });
 });
-// Routing
+// routing
 app.use(userRouter);
 app.use(gramRouter);
 app.use(likeRouter);
@@ -45,18 +41,7 @@ app.use((err, req, res, next) => {
     });
   }
 });
-if (process.env.ENV === 'DEV') {
-  server.listen(process.env.PORT, () => {
-    // eslint-disable-next-line no-console
-    console.log('[http] Server listening on port', process.env.PORT);
-  });
-} else if (process.env.ENV === 'LIVE') {
-  https.createServer({
-    key: fs.readFileSync('/etc/letsencrypt/live/city.heegu.net/privkey.pem'),
-    cert: fs.readFileSync('/etc/letsencrypt/live/city.heegu.net/fullchain.pem')
-  },
-  app).listen(process.env.PORT, () => {
+server.listen(process.env.PORT, () => {
   // eslint-disable-next-line no-console
-    console.log(`[https] Server listening on port ${process.env.PORT}`);
-  });
-}
+  console.log('[http] Server listening on port', process.env.PORT);
+});
