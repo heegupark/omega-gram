@@ -33,7 +33,7 @@ class User extends Component {
   }
 
   getFollowers() {
-    const authToken = window.localStorage.getItem(process.env.AUTH_TOKEN_STRING);
+    const authToken = window.localStorage.getItem('omegagram-authtoken');
     if (authToken) {
       fetch('/api/followers', {
         method: 'GET',

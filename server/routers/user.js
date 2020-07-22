@@ -113,7 +113,7 @@ router.post('/api/following', auth, async (req, res) => {
     // const newUser = await User.findOne({ _id: userId });
     res.json(newUser);
   } catch (e) {
-    res.status(400).send({ status: 'failed to add' });
+    return res.status(400).send({ status: 'failed to add' });
   }
 });
 // STOP FOLLOW
@@ -131,17 +131,27 @@ router.post('/api/stopfollowing', auth, async (req, res) => {
     res.status(400).send({ status: 'failed to unfollow' });
   }
 });
-// GET FOLLOWERS
+// GET MY FOLLOWERS
 router.get('/api/followers', auth, async (req, res) => {
   const userId = req.user._id;
   try {
-    let followers = await User.find({ 'followings.following': userId });
-    followers = followers.filter(follower => {
-      return follower._id.toString() !== userId.toString();
-    });
-    res.json(followers);
+    // let followers = await User.find({ 'followings.following': userId });
+    const followers = await User.aggregate([
+      { $unwind: '$followings' },
+      { $match: { 'followings.following': userId } },
+      {
+        $lookup:
+        {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'userInfo'
+        }
+      }
+    ]).exec();
+    return res.json(followers);
   } catch (e) {
-    res.status(400).send({ status: 'failed to get followers' });
+    return res.status(400).send({ success: false, message: 'failed to get followers' });
   }
 });
 // GET TOP GRAMMERS
@@ -171,18 +181,28 @@ router.get('/api/grammers', auth, async (req, res) => {
   }
 });
 // GET TOP FOLLOWERS
-router.get('/api/followers', auth, async (req, res) => {
+router.get('/api/topfollowers', auth, async (req, res) => {
   const limit = req.query.limit;
   const skip = req.query.skip;
   try {
     const followers = await User.aggregate([
-      { $group: { _id: '$followings.follow._id', count: { $sum: 1 } } },
+      { $unwind: '$followings' },
+      { $group: { _id: '$followings.following', count: { $sum: 1 } } },
+      {
+        $lookup:
+        {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'userInfo'
+        }
+      },
       { $sort: { count: -1 } }
     ]).limit(Number(limit)).skip(Number(skip)).exec();
     if (!followers) {
       return res.status(400).json({ success: false, message: 'failed to find top followers' });
     }
-    res.json({ success: true, data: followers });
+    return res.json({ success: true, data: followers });
   } catch (e) {
     return res.status(500).send({ success: false, message: 'failed to get followers' });
   }

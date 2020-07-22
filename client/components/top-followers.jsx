@@ -31,7 +31,7 @@ class TopFollowers extends Component {
 
   getTopFollowers(limit, skip) {
     const authToken = window.localStorage.getItem('omegagram-authtoken');
-    fetch(`/api/followers/?limit=${limit}&skip=${skip}`, {
+    fetch(`/api/topfollowers/?limit=${limit}&skip=${skip}`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${authToken}`
@@ -41,7 +41,7 @@ class TopFollowers extends Component {
       .then(result => {
         if (result.success) {
           this.setState({
-            followings: result.data
+            followers: result.data
           });
         }
       })
@@ -64,11 +64,11 @@ class TopFollowers extends Component {
                   <span
                     id={follower._id}
                     className="cursor hover-blue"
-                    onClick={handleUsernameClick}>{follower.username}
+                    onClick={handleUsernameClick}>{follower.userInfo[0].username}
                   </span>
                 </td>
                 <td className="text-center">
-                  <span>{`${follower.count} post${follower.count > 1 ? 's' : ''}`}
+                  <span>{`${follower.count} follower${follower.count > 1 ? 's' : ''}`}
                   </span>
                 </td>
                 <td className="text-center">

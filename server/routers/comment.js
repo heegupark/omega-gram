@@ -24,7 +24,7 @@ router.post('/api/comment', auth, async (req, res) => {
         return comment.userId._id.toString() === userId.toString();
       });
       req.io.sockets.emit(`comment-${postId}`, { comments: newResult[newResult.length - 1] });
-      res.status(201).send({ success: true, comments: newResult[newResult.length - 1] });
+      return res.status(201).send({ success: true, comments: newResult[newResult.length - 1] });
     } catch (e) {
       res.status(400).json({ success: false, message: 'failed to comment' });
     }
@@ -40,7 +40,7 @@ router.get('/api/comments/:postId', auth, async (req, res) => {
     if (!findComments) {
       return res.json({ success: false, message: 'no comments' });
     }
-    res.status(200).json({ success: true, comments: findComments.comments });
+    return res.status(200).json({ success: true, comments: findComments.comments });
   } catch (e) {
     return res.status(500).json({ success: false, message: 'failed to find comments' });
   }

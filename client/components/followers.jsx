@@ -29,7 +29,8 @@ class Followers extends Component {
               const isFollowing = user ? user.followings.filter(follow => follow.following._id.toString() === follower._id.toString()) : false;
               return (
                 <tr key={follower._id}>
-                  <td>
+                  <td></td>
+                  <td className="text-center">
                     <span
                       className="cursor hover-blue"
                       id={follower._id}

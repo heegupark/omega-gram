@@ -26,12 +26,12 @@ router.patch('/api/like', auth, async (req, res) => {
     }
     try {
       await findPost.save();
-      res.status(201).json({ success: true, isLiked: true, message: 'liked' });
+      return res.status(201).json({ success: true, isLiked: true, message: 'liked' });
     } catch (e) {
-      res.status(400).json({ success: false, message: 'failed to like the post' });
+      return res.status(400).json({ success: false, message: 'failed to like the post' });
     }
   } catch (e) {
-    res.status(500).json({ success: false, message: 'failed to find the post' });
+    return res.status(500).json({ success: false, message: 'failed to find the post' });
   }
 });
 
@@ -39,9 +39,9 @@ router.get('/api/like/:postId', async (req, res) => {
   const postId = req.params.postId;
   try {
     const post = await Like.findOne({ postId }).populate('likes.userId').exec();
-    res.json(post.likes);
+    return res.json(post.likes);
   } catch (e) {
-    res.json({ success: false, message: 'no likes' });
+    return res.json({ success: false, message: 'no likes' });
   }
 });
 
@@ -54,12 +54,12 @@ router.post('/api/like', async (req, res) => {
     }
     const findLike = findPost.likes.filter(like => like.userId.toString() === userId.toString());
     if (findLike.length > 0) {
-      res.json({ success: true, isLiked: true, message: 'liked' });
+      return res.json({ success: true, isLiked: true, message: 'liked' });
     } else {
       return res.json({ success: false, message: 'did not like' });
     }
   } catch (e) {
-    res.status(500).send();
+    return res.status(500).send();
   }
 });
 

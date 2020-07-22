@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import socketIOClient from 'socket.io-client';
+const socket = socketIOClient('/');
 
 class Comments extends Component {
   constructor() {
@@ -19,12 +20,19 @@ class Comments extends Component {
 
   componentDidMount() {
     this.getComments();
-    const socket = socketIOClient('/');
+    // const socket = socketIOClient('/');
     socket.on(`comment-${this.props.postId}`, data => {
       this.setState({
         comments: [...this.state.comments, data.comments]
       });
     });
+  }
+
+  componentWillUnmount() {
+    this.setState = (state, callback) => {
+    };
+    // const socket = socketIOClient('/');
+    socket.emit('disconnect');
   }
 
   handleViewCommentToggle() {
