@@ -34,14 +34,16 @@ class Create extends Component {
     this.uploader.current.click();
   }
 
-  handleUpdateFileInputChange() {
-    event.preventDefault();
-    this.setState({
-      file: event.target.files[0],
-      fileObject: URL.createObjectURL(event.target.files[0]),
-      previewFileObject: URL.createObjectURL(event.target.files[0]),
-      fileName: event.target.files[0].name
-    });
+  handleUpdateFileInputChange(e) {
+    e.preventDefault();
+    if (event.target.files[0]) {
+      this.setState({
+        file: event.target.files[0],
+        fileObject: URL.createObjectURL(event.target.files[0]),
+        previewFileObject: URL.createObjectURL(event.target.files[0]),
+        fileName: event.target.files[0].name
+      });
+    }
   }
 
   handleFileDropChange() {
