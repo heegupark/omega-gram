@@ -18,9 +18,9 @@ class TopFollowers extends Component {
   handleFollowBtnClick(e) {
     e.preventDefault();
     this.props.addFollowing(event.target.id);
-    const array = this.state.grammers.filter(grammer => grammer._id.toString() !== event.target.id.toString());
+    const array = this.state.followers.filter(follower => follower._id.toString() !== event.target.id.toString());
     this.setState({
-      grammers: array
+      followers: array
     });
   }
 
@@ -31,7 +31,7 @@ class TopFollowers extends Component {
 
   getTopFollowers(limit, skip) {
     const authToken = window.localStorage.getItem('omegagram-authtoken');
-    fetch(`/api/topfollowers/?limit=${limit}&skip=${skip}`, {
+    fetch(`/api/topfollowings/?limit=${limit}&skip=${skip}`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${authToken}`

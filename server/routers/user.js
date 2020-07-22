@@ -156,11 +156,17 @@ router.get('/api/followers', auth, async (req, res) => {
 });
 // GET TOP GRAMMERS
 router.get('/api/grammers', auth, async (req, res) => {
+  const userId = req.user._id;
   const limit = req.query.limit;
   const skip = req.query.skip;
   try {
+    const user = await User.findById(userId);
+    const followings = [];
+    user.followings.map(following => followings.push(following.following));
     const grammers = await Gram.aggregate([
       { $group: { _id: '$owner', count: { $sum: 1 } } },
+      { $match: { _id: { $nin: [userId] } } },
+      { $match: { _id: { $nin: followings } } },
       {
         $lookup:
         {
@@ -181,13 +187,19 @@ router.get('/api/grammers', auth, async (req, res) => {
   }
 });
 // GET TOP FOLLOWERS
-router.get('/api/topfollowers', auth, async (req, res) => {
+router.get('/api/topfollowings', auth, async (req, res) => {
+  const userId = req.user._id;
   const limit = req.query.limit;
   const skip = req.query.skip;
   try {
+    const user = await User.findById(userId);
+    const followings = [];
+    user.followings.map(following => followings.push(following.following));
     const followers = await User.aggregate([
       { $unwind: '$followings' },
       { $group: { _id: '$followings.following', count: { $sum: 1 } } },
+      { $match: { _id: { $nin: [userId] } } },
+      { $match: { _id: { $nin: followings } } },
       {
         $lookup:
         {
@@ -202,6 +214,7 @@ router.get('/api/topfollowers', auth, async (req, res) => {
     if (!followers) {
       return res.status(400).json({ success: false, message: 'failed to find top followers' });
     }
+
     return res.json({ success: true, data: followers });
   } catch (e) {
     return res.status(500).send({ success: false, message: 'failed to get followers' });
