@@ -57,31 +57,47 @@ class TopFollowers extends Component {
     return (
       <table className="mx-auto w-100">
         <tbody>
-          {followers.map(follower => {
-            return (
-              <tr key={follower._id}>
-                <td className="text-center">
-                  <span
-                    id={follower._id}
-                    className="cursor hover-blue"
-                    onClick={handleUsernameClick}>{follower.userInfo[0].username}
-                  </span>
-                </td>
-                <td className="text-center">
-                  <span>{`${follower.count} follower${follower.count > 1 ? 's' : ''}`}
-                  </span>
-                </td>
-                <td className="text-center">
-                  <span>
-                    <div
-                      id={follower._id}
-                      className="text-warning cursor hover-black"
-                      onClick={handleFollowBtnClick}>follow</div>
-                  </span>
+          {followers.length
+            ? (
+              followers.map(follower => {
+                return (
+                  <tr key={follower._id}>
+                    <td className="text-center">
+                      <span
+                        id={follower._id}
+                        className="cursor hover-blue"
+                        onClick={handleUsernameClick}>{follower.userInfo[0].username}
+                      </span>
+                    </td>
+                    <td className="text-center">
+                      <span>{`${follower.count} follower${follower.count > 1 ? 's' : ''}`}
+                      </span>
+                    </td>
+                    <td className="text-center">
+                      <span>
+                        <div
+                          id={follower._id}
+                          className="text-warning cursor hover-black"
+                          onClick={handleFollowBtnClick}>follow</div>
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })
+            )
+            : (
+              <tr>
+                <td>
+                  <div className="text-center">
+                    {'click '}
+                    <span className="text-primary text-center cursor hover-black" onClick={handleUsernameClick}>{'here'}</span>
+                    {' to start enjoying o-gram!!!'}
+                  </div>
                 </td>
               </tr>
-            );
-          })}
+            )
+
+          }
         </tbody>
       </table>
     );
